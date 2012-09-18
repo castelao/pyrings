@@ -1,0 +1,9 @@
+.. PyRings is package to handle rings in the ocean
+
+News
+====
+
+0.6
+---
+
+* First public release. It estimates the ring center and propagation velocity assuming to be ab axis-symetric vortex. The velocity field is than corrected by the magnitude and position as all data was all sampled at the same instant.

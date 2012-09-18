@@ -17,11 +17,11 @@
 #import logging
 from datetime import datetime, timedelta
 
-import numpy
+import numpy as np
 from numpy import ma
 from scipy import optimize
 
-from rings.utils import uv2nt, nt2uv
+from rings.utils import uv2nt
 from rings import fitt
 from fluid.common.common import lonlat2xy, xy2lonlat
 
@@ -42,7 +42,6 @@ class Ring(object):
     """
 
     def __init__(self, input, metadata={}, auto=True, **keywords):
-
         """
         """
 
@@ -150,7 +149,7 @@ class Ring(object):
 
     def plot(self):
         import pylab
-        import pdb; pdb.set_trace()
+        #import pdb; pdb.set_trace()
         pylab.quiver(self.data['x'], self.data['y'], self.input['u'],
                 self.input['v'], color='r')
         pylab.quiver(self.data['xr'], self.data['yr'], self.data['ur'], self.data['vr'])

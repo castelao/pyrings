@@ -5,15 +5,12 @@
 """ Util functions for the module rings
 """
 
+import ConfigParser
+import re
+from datetime import timedelta
+
 import numpy
 from numpy import ma
-#import pupynere
-#from datetime import datetime
-#from datetime import timedelta
-
-from UserDict import UserDict
-#from UserDict import IterableUserDict
-
 
 # ============================================================================
 def uv2nt(x,y,u,v,x_c=0,y_c=0):
@@ -70,7 +67,6 @@ def nt2uv(x,y,n,t,x_c=0,y_c=0):
     v = n*numpy.sin(alpha) + t*numpy.cos(alpha);
 
     return [u,v]
-
 
 
 # ============================================================================
@@ -140,7 +136,6 @@ def cfg2dict(cfg_file):
     """Extract all variables from a ConfigParser file and create a dict[section][option]
 
     """
-    import ConfigParser
     cfg = ConfigParser.SafeConfigParser()
     try:
         cfg.readfp(open(cfg_file))
@@ -149,7 +144,6 @@ def cfg2dict(cfg_file):
         print "Improve this error handle"
         return
     parameters = {}
-    import re
     for section in cfg.sections():
         parameters[section] = {}
         for option in cfg.options(section):
@@ -183,7 +177,6 @@ def cfg2dict(cfg_file):
             elif re.search("^-?\d+(\.\d+)?(e-?\d+)?$", par):
                 parameters[section][option] = float(par)
             elif re.match('^(?P<value>\d+)(?P<unit>days|hours|minutes|seconds)$',par):
-                from datetime import timedelta
                 tmp = re.match('^(?P<value>\d+)(?P<unit>days|hours|minutes|seconds)$',par)
                 if tmp.group('unit')=='days':
                     parameters[section][option] = timedelta(days=float(tmp.group('value')))
@@ -294,11 +287,6 @@ class EddyData(object):
             return EddyDataVar(self.input, ind)
 
 # ============================================================================
-#from fluid.common import _diff_centred
-from fluid.common.common import dxdy_centred
-#from fluid.common import differentiate
-
-
 def neighbor_cluster(ind, verbose=False):
     """ Define neighbor patches
 

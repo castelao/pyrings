@@ -2,19 +2,16 @@
 # -*- coding: Latin-1 -*-
 # vim: tabstop=4 shiftwidth=4 expandtab
 
-""" Algorithm to identify the NBCR using the Okubo-Weiss index.
+""" Estimate de Okubo-Weiss parameter and handle related variables/procedures.
 """
 
 import logging
 import multiprocessing
-#from datetime import datetime
-#from datetime import timedelta
 from UserDict import UserDict
 #from UserDict import IterableUserDict
 
 import numpy
 from numpy import ma
-#import pupynere
 
 import fluid
 from maud import window_mean_2D_latlon
@@ -23,15 +20,13 @@ from rings.utils import basic_logger
 from rings.utils import cfg2dict
 
 
-# This file should have only OkuboWeiss related stuff. It got too big.
-
 def okuboweiss(input):
     """ Estimate W and zeta
     """
     from fluid.common.common import FieldDiferentials
     output = {}
-    #
-    differentials = FieldDiferentials(input, dims={'x':1,'y':0})
+
+    differentials = FieldDiferentials(input, dims={'x': 1, 'y': 0})
     output['zeta'] = differentials['dvdx'] - differentials['dudy']
     # This is the simplification for the 2D incompressible flow
     #self.data['W'] = 4*(differentials['dudx']**2 + \
@@ -42,6 +37,7 @@ def okuboweiss(input):
       + 4*differentials['dvdx']*differentials['dudy']
     #
     return output
+
 
 # ----------------------------------------------------------------------------
 class OkuboWeiss(UserDict):
@@ -59,7 +55,7 @@ class OkuboWeiss(UserDict):
           extra variables, like if is to smooth, with each method and
           which cutoff frequency, or which method to estimate W0.
     """
-    def __init__(self, input, metadata={'W0':'chelton'}, logname=None, **keywords):
+    def __init__(self, input, metadata={'W0': 'chelton'}, logname=None, **keywords):
         """
         """
         self._set_logger(logname)
@@ -77,7 +73,7 @@ class OkuboWeiss(UserDict):
 
     def _set_logger(self, logname):
         self.logname = logname
-        if logname==None:
+        if logname is None:
             self.logger = basic_logger(logname="Generic")
         else:
             try:
@@ -93,8 +89,9 @@ class OkuboWeiss(UserDict):
             if v not in self.data.keys():
                 self.data[v] = ma.masked_all(self.input['u'].shape)
 
-        if len(self.input['u'].shape)==3 and len(self.input['v'].shape)==3:
-            self.logger.info("The fields u and v are 3D. I'll repeat along the first dimension.")
+        if len(self.input['u'].shape) == 3 and len(self.input['v'].shape) == 3:
+            self.logger.info("The fields u and v are 3D. \
+                    I'll repeat along the first dimension.")
             nt, ni, nj = self.input['u'].shape
 
             npes = 2*multiprocessing.cpu_count()
@@ -104,9 +101,9 @@ class OkuboWeiss(UserDict):
 
             self.logger.debug("I'm about to fire the pool processes")
             for t in range(nt):
-                snapshot = {'Lon':self.input['Lon'], 'Lat':self.input['Lat'], \
-                        'u':self.input['u'][t], 'v':self.input['v'][t]}
-                results.append( pool.apply_async( okuboweiss, (snapshot,)) )
+                snapshot = {'Lon': self.input['Lon'], 'Lat': self.input['Lat'],
+                        'u': self.input['u'][t], 'v': self.input['v'][t]}
+                results.append( pool.apply_async( okuboweiss, (snapshot,) ) )
             pool.close()
 
             for t, r in enumerate(results):
@@ -130,7 +127,6 @@ class OkuboWeiss(UserDict):
         self.set_W0()
 
         self.logger.info("I'm done with class OkuboWeiss")
-
 
     def set_sigma_W(self):
         """ Pseudo-Standart deviation of W index
@@ -158,9 +154,9 @@ class OkuboWeiss(UserDict):
         """
         self.logger.debug("Starting to smooth the data")
         for var in self.metadata['smooth']['vars']:
-            smooth = window_mean_2D_latlon(self.input['Lat'], self.input['Lon'], \
-              data = {var: self.data[var]}, \
-              l = self.metadata['smooth']['scale'], \
-              method = self.metadata['smooth']['method'] )
+            smooth = window_mean_2D_latlon(self.input['Lat'], self.input['Lon'],
+                data = {var: self.data[var]},
+                l = self.metadata['smooth']['scale'],
+                method = self.metadata['smooth']['method'])
             self.data[var] = smooth[var]
 

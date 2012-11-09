@@ -16,7 +16,7 @@ install_requires = [
     'PyYAML'
 ]
 
-version = '0.6'
+version = '0.7'
 
 setup(
     name = 'rings',
@@ -41,7 +41,7 @@ setup(
     license='PSF',
     download_url="http://cheeseshop.python.org/packages/source/P/rings/rings-%s.tar.gz" % version,
     #py_modules=['rings.rings','rings_plots','rings.okuboweiss','okuboweiss_plot','rings.EddyTracking'],
-    py_modules=['rings.ring', 'rings.utils', 'rings.fitt'],
+    py_modules=['rings.ring', 'rings.utils', 'rings.fitt','rings.okuboweiss'],
     #packages=find_packages(),
     #packages=['rings'],
     zip_safe=True,

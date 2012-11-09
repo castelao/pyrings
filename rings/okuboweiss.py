@@ -28,14 +28,16 @@ def okuboweiss(input):
 
     differentials = FieldDiferentials(input, dims={'x': 1, 'y': 0})
     output['zeta'] = differentials['dvdx'] - differentials['dudy']
-    # This is the simplification for the 2D incompressible flow
-    #self.data['W'] = 4*(differentials['dudx']**2 + \
-    #  differentials['dvdx']*differentials['dudy'])
+
     output['W'] = differentials['dudx']**2 \
       - 2*differentials['dudx']*differentials['dvdy'] \
       + differentials['dvdy']**2 \
       + 4*differentials['dvdx']*differentials['dudy']
-    #
+
+    # The simplification for the 2D incompressible flow
+    #self.data['W'] = 4*(differentials['dudx']**2 + \
+    #  differentials['dvdx']*differentials['dudy'])
+
     return output
 
 

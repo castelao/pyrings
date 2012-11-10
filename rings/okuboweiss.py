@@ -14,7 +14,6 @@ import numpy
 from numpy import ma
 
 import fluid
-from maud import window_mean_2D_latlon
 
 from rings.utils import basic_logger
 from rings.utils import cfg2dict
@@ -46,7 +45,7 @@ class OkuboWeiss(UserDict):
     """ Class to estimate the Okubo-Weiss (OW) index from a regular
           velocity field
 
-        Big change for the first version. OW was supposed to be applied
+        Big change from the first version. OW was supposed to be applied
           in a field, therefore it don't deal anymore with 3rd dimension,
           i.e. 2D fields only. Whatever is using the OW, the higher level
           procedures that should deal with the extra dimensions (t,z...).
@@ -121,11 +120,6 @@ class OkuboWeiss(UserDict):
         else:
             print "Error, u and v must be 2D or 3D"
 
-        #
-        # Don't like this. Or I change the concept to save a .input, or I
-        #   the smoothed data should go somewhere else.
-        if 'smooth'in self.metadata.keys():
-            self._smooth()
         self.set_W0()
 
         self.logger.info("I'm done with class OkuboWeiss")
@@ -149,16 +143,3 @@ class OkuboWeiss(UserDict):
         elif type(self.metadata['W0']) == float:
             self.data['W0'] = self.metadata['W0']
         return
-
-    def _smooth(self):
-        """ Smooth W and zeta
-
-        """
-        self.logger.debug("Starting to smooth the data")
-        for var in self.metadata['smooth']['vars']:
-            smooth = window_mean_2D_latlon(self.input['Lat'], self.input['Lon'],
-                data = {var: self.data[var]},
-                l = self.metadata['smooth']['scale'],
-                method = self.metadata['smooth']['method'])
-            self.data[var] = smooth[var]
-

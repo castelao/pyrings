@@ -21,6 +21,9 @@ from rings.utils import cfg2dict
 
 def okuboweiss(input):
     """ Estimate W and zeta
+
+        In theory I should be able to use the 2D simplification, otherwise
+          if it's a compressible flow the whole concept wouldn't be appliable.
     """
     from fluid.common.common import FieldDiferentials
     output = {}

@@ -16,7 +16,6 @@ from numpy import ma
 import fluid
 
 from rings.utils import basic_logger
-from rings.utils import cfg2dict
 
 
 def okuboweiss(input):

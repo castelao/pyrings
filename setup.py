@@ -41,7 +41,7 @@ setup(
     license='PSF',
     download_url="http://cheeseshop.python.org/packages/source/P/rings/rings-%s.tar.gz" % version,
     #py_modules=['rings.rings','rings_plots','rings.okuboweiss','okuboweiss_plot','rings.EddyTracking'],
-    py_modules=['rings.ring', 'rings.utils', 'rings.fitt','rings.okuboweiss'],
+    py_modules=['rings.ring', 'rings.utils', 'rings.fitt'],
     #packages=find_packages(),
     #packages=['rings'],
     zip_safe=True,

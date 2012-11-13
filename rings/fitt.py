@@ -5,7 +5,8 @@
 """ A module to handle the fittings for the rings' class
 """
 
-import numpy import ma
+import numpy as np
+from numpy import ma
 
 from rings.utils import uv2nt
 

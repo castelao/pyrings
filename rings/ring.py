@@ -158,7 +158,7 @@ class Ring(object):
         self.data['ur'] = self.input['u'] - self.data['uc']
         self.data['vr'] = self.input['v'] - self.data['vc']
 
-        self.data['Lon_r'], self.data['Lat_r'] = xy2lonlat(self.data['xc'],
+        self.data['Lon_c'], self.data['Lat_c'] = xy2lonlat(self.data['xc'],
                 self.data['yc'], self.lon_ref, self.lat_ref)
 
     def plot(self):

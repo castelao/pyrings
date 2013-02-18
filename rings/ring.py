@@ -50,7 +50,7 @@ class Ring(object):
           data:
             Lat: Latitude
             Lon: Longitude
-            t: Time [datetime]
+            datetime: Time [datetime]
             u: u component of velocity
             v: v component of velocity
     """

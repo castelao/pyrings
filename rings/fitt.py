@@ -8,7 +8,7 @@
 import numpy as np
 from numpy import ma
 
-from rings.utils import uv2nt
+from rings.utils import uv2nt, nt2uv
 
 class v_circular(object):
     """
@@ -83,7 +83,7 @@ def carton_uv(x, y,omega0, delta, alpha):
     """ Carton's model for azimuthal velocity
     """
     r = ((x)**2+(y)**2)**0.5
-    mag = 0.5*omega0*(((x)**2+(y)**2)**0.5)*numpy.exp(-((((x)**2+(y)**2)**0.5)/delta)**alpha)
+    mag = 0.5*omega0*(((x)**2+(y)**2)**0.5)*np.exp(-((((x)**2+(y)**2)**0.5)/delta)**alpha)
     u,v = nt2uv(x,y,0,mag)
     return u, v
 

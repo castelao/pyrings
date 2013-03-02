@@ -215,7 +215,13 @@ def cfg2dict(cfg_file):
 
 
 class EddyDataVar(object):
-    """
+    """ Return each variable for each eddy
+
+        This is necessary because the reference data fields are
+          stored as dictionaries of 3D data:
+          {var1: 3D MA, var2: 3D MA}
+          but with this class is possible to recover the data as
+          EddyDataVar[var1]
     """
     def __init__(self, input, ind, mask=False):
         """

@@ -11,6 +11,15 @@ from numpy import ma
 from rings.utils import uv2nt
 
 class v_circular(object):
+    """
+
+        Recomendation from the paper reviewer! Include the
+          penalty function for the translation speed. Old eq. 7,
+          eq. 11 on the new version.
+          J = \frac{1}{2N} \sum_{n=1}^{N}
+              \frac{{v_{r}^2}_n}{|V_n|}
+            + \frac{\lambda}{2} (u_{cn} + v_{cn})^2.
+    """
     def __init__(self):
         # Escalas
         self.s = [1e4, 1e4, 1e-1, 1e-1]

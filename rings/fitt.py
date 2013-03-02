@@ -76,3 +76,14 @@ class v_circular_nontranslating(object):
         #e = 1./n*ma.sum( vr**2 )
         return e
 
+# =========================
+# Moving carton_uv to here just to be able to run the Monte Carlo tests,
+#   but in the future, create a new class for the Carton&Legras vortex.
+def carton_uv(x, y,omega0, delta, alpha):
+    """ Carton's model for azimuthal velocity
+    """
+    r = ((x)**2+(y)**2)**0.5
+    mag = 0.5*omega0*(((x)**2+(y)**2)**0.5)*numpy.exp(-((((x)**2+(y)**2)**0.5)/delta)**alpha)
+    u,v = nt2uv(x,y,0,mag)
+    return u, v
+

@@ -52,7 +52,7 @@ class v_circular(object):
         # Maybe
         #e = 1./(2*n)*ma.sum( vr**2/mag )
         #e = 1./n*ma.sum( vr**2 )
-        e = 1./(2*n)*ma.sum( (vr/mag)**2 ) +
+        e = 1./(2*n)*ma.sum( (vr/mag)**2 ) + \
             p[4]/2 * (s[2] + s[3])**0.5
         return e
 

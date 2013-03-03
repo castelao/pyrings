@@ -18,7 +18,7 @@ from numpy.random import random, randn
 from fluid.common.common import xy2lonlat, lonlat2xy
 
 from rings.ring import Ring
-from ringslegacy import fitt
+from rings.fitt import carton_uv
 #from ringslegacy import utils
 
 
@@ -29,7 +29,7 @@ def synthetic_CLring(x, y, t, cfg):
     """
     x_c = cfg['u_c'] * t  # + cfg['xt0']
     y_c = cfg['v_c'] * t  # + cfg['yt0']
-    u, v = fitt.carton_uv(x-x_c, y-y_c, cfg['omega0'], cfg['delta'], cfg['alpha'])
+    u, v = carton_uv(x-x_c, y-y_c, cfg['omega0'], cfg['delta'], cfg['alpha'])
     return u+cfg['u_c'], v+cfg['v_c']
 
 def drunken_walk(N, step=1, x0=0, y0=0):
@@ -82,16 +82,16 @@ def random_sample_equal_area(N, Rlimit):
     return x, y
 
 def error_estimate(cfg):
-    N = cfg['montcarlo']['N'] 
+    N = cfg['montecarlo']['N'] 
     # Define the (x,y) sampling positions
-    x, y = random_sample_equal_area(N , cfg['montcarlo']['Rlimit'] )
-    t = np.arange(N)*cfg['montcarlo']['dt']
+    x, y = random_sample_equal_area(N , cfg['montecarlo']['Rlimit'] )
+    t = np.arange(N)*cfg['montecarlo']['dt']
     t = t - np.median(t)
     # Estimate the measures
     u, v = synthetic_CLring(x, y, t, cfg['ring'])
     # Add a noise
-    u = u + cfg['montcarlo']['Vnoise_sigma'] * randn(N)
-    v = v + cfg['montcarlo']['Vnoise_sigma'] * randn(N)
+    u = u + cfg['montecarlo']['Vnoise_sigma'] * randn(N)
+    v = v + cfg['montecarlo']['Vnoise_sigma'] * randn(N)
     # Might have a better way to do the line below.
     d0 = datetime(1,1,1)
     d = d0+ma.array([timedelta(seconds=dt) for dt in t])
@@ -101,7 +101,7 @@ def error_estimate(cfg):
     input = {'datetime': d, 'Lon': lon, 'Lat': lat, 'u':u, 'v':v}
     anel = Ring(input)
     # error estimate
-    xt_err, yt_err = lonlat2xy(ma.array([anel['Lon_r']]), ma.array([anel['Lat_r']]), [cfg['ring']['lon_t0']], [cfg['ring']['lat_t0']])
+    xt_err, yt_err = lonlat2xy(ma.array([anel['Lon_c']]), ma.array([anel['Lat_c']]), [cfg['ring']['lon_t0']], [cfg['ring']['lat_t0']])
     #ut_est = anel['uc'] - cfg['u_c']
     #vt_est = anel['vc'] - cfg['v_c']
     output = cfg.copy()
@@ -120,3 +120,30 @@ def random_cfg(cfg):
         else:
             cfg2[k] = cfg[k]
     return cfg2
+
+import multiprocessing
+import pandas as pd
+def montecarlo(cfg_base, N):
+    """
+    """
+    npes = 2 * multiprocessing.cpu_count()
+    pool = multiprocessing.Pool(npes)
+    results = []
+
+    for n in range(N):
+        cfg_tmp = random_cfg(cfg_base)
+        # Temporary solution
+        #output = error_estimate(cfg_tmp)
+        results.append( pool.apply_async( error_estimate, (cfg_tmp,) ) )
+
+    data = []
+    for i, r in enumerate(results):
+        output = r.get()
+        tmp = {}
+        for k in output.keys():
+            for kk in output[k].keys():
+                tmp[kk] = output[k][kk]
+        data.append(tmp)
+
+    data = pd.DataFrame(data)
+    return data

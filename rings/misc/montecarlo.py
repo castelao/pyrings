@@ -8,8 +8,7 @@
 """
 
 from datetime import datetime, timedelta
-#from UserDict import UserDict
-#from UserDict import IterableUserDict
+import multiprocessing
 
 import numpy as np
 from numpy import ma
@@ -19,7 +18,6 @@ from fluid.common.common import xy2lonlat, lonlat2xy
 
 from rings.ring import Ring
 from rings.fitt import carton_uv
-#from ringslegacy import utils
 
 
 def synthetic_CLring(x, y, t, cfg):
@@ -121,8 +119,7 @@ def random_cfg(cfg):
             cfg2[k] = cfg[k]
     return cfg2
 
-import multiprocessing
-import pandas as pd
+#import pandas as pd
 def montecarlo(cfg_base, N):
     """
     """
@@ -145,5 +142,5 @@ def montecarlo(cfg_base, N):
                 tmp[kk] = output[k][kk]
         data.append(tmp)
 
-    data = pd.DataFrame(data)
+    #data = pd.DataFrame(data)
     return data

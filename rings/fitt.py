@@ -19,10 +19,15 @@ class v_circular(object):
           J = \frac{1}{2N} \sum_{n=1}^{N}
               \frac{{v_{r}^2}_n}{|V_n|}
             + \frac{\lambda}{2} (u_{cn} + v_{cn})^2.
+
+        I'm not sure how would be the best way to include the
+          penalty factor lambda. Might be a good idea to depend on
+          the number of available observations. More observations,
+          less succetible it is to the over fitting effect.
     """
     def __init__(self):
         # Escalas
-        self.s = [1e4, 1e4, 1e-1, 1e-1]
+        self.s = [1e4, 1e4, 1e-1, 1e-1, 1]
         # Improve it. Consider the data input to better suggest initial values
         #   like x0 as the median of x, or eta0 as marximum/minimum eta.
         # Consider to migrate for named tuples or dictionary.
@@ -47,13 +52,13 @@ class v_circular(object):
         mag = (u**2+v**2)**0.5
         #vt = -u*ma.sin(ma.arctan2(y-p[1], x-p[0])) + \
         #      v*ma.cos(ma.arctan2(y-p[1], x-p[0]))
-        #e = 1./(2*n)*ma.sum( (vr/mag)**2 )
+        e = 1./(2*n)*ma.sum( (vr/mag)**2 )
         # Penalized version
         # Maybe
         #e = 1./(2*n)*ma.sum( vr**2/mag )
         #e = 1./n*ma.sum( vr**2 )
-        e = 1./(2*n)*ma.sum( (vr/mag)**2 ) + \
-            p[4]/2 * (s[2] + s[3])**0.5
+        #e = 1./(2*n)*ma.sum( (vr/mag)**2 ) + \
+        #    p[4]/2 * (s[2]*p[2] + s[3]*p[3])**2
         return e
 
 class v_circular_nontranslating(object):

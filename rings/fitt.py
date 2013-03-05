@@ -27,11 +27,14 @@ class v_circular(object):
     """
     def __init__(self):
         # Escalas
-        self.s = [1e4, 1e4, 1e-1, 1e-1, 1]
+        self.s = [1e4, 1e4, 1e-1, 1e-1]
+        # xc|yc [10 km], uc|vc [10 cm], lambda
+
+        # First guess for the parameters
         # Improve it. Consider the data input to better suggest initial values
         #   like x0 as the median of x, or eta0 as marximum/minimum eta.
         # Consider to migrate for named tuples or dictionary.
-        self.p0 = [-1, -1, .1, .1, 0]
+        self.p0 = [-1, -1, .1, .1]
 
     #def set_p0(self, p0=None):
     #    if p0 == None:
@@ -52,13 +55,15 @@ class v_circular(object):
         mag = (u**2+v**2)**0.5
         #vt = -u*ma.sin(ma.arctan2(y-p[1], x-p[0])) + \
         #      v*ma.cos(ma.arctan2(y-p[1], x-p[0]))
-        e = 1./(2*n)*ma.sum( (vr/mag)**2 )
+        #e = 1./(2*n)*ma.sum( (vr/mag)**2 )
         # Penalized version
         # Maybe
         #e = 1./(2*n)*ma.sum( vr**2/mag )
         #e = 1./n*ma.sum( vr**2 )
-        #e = 1./(2*n)*ma.sum( (vr/mag)**2 ) + \
-        #    p[4]/2 * (s[2]*p[2] + s[3]*p[3])**2
+
+        lam = 1e-2
+        e = 1./(2*n)*ma.sum( (vr/mag)**2 ) + \
+                lam/2 * (s[2]*p[2] + s[3]*p[3])**2
         return e
 
 class v_circular_nontranslating(object):

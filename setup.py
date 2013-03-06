@@ -12,14 +12,13 @@ NEWS = "." #open(os.path.join(here, 'NEWS.txt')).read()
 
 install_requires = [
     'numpy>=1.1', 
-    'fluid', 
-    'PyYAML'
+    'fluid'
 ]
 
-version = '0.7.3'
+version = '0.7.4'
 
 setup(
-    name = 'rings',
+    name = 'pyrings',
     version = version,
     description = "Procedures to handle coherent vortexes in the ocean",
     long_description=README + '\n\n' + NEWS,
@@ -37,9 +36,11 @@ setup(
     keywords='rings, eddies, ADCP, Gradient Balance',
     author='Guilherme Castelao, Luiz Irber',
     author_email='guilherme@castelao.net, luiz.irber@gmail.com',
-    url='http://cheeseshop.python.org/pypi/rings',
+    url='http://pyrings.castelao.net',
     license='PSF',
-    download_url="http://cheeseshop.python.org/packages/source/P/rings/rings-%s.tar.gz" % version,
+    #download_url="https://github.com/castelao/pyrings/archive/master.zip",
+    #download_url="https://pypi.python.org/packages/source/r/rings/",
+    download_url="https://pypi.python.org/packages/source/p/pyrings/",
     #py_modules=['rings.rings','rings_plots','rings.okuboweiss','okuboweiss_plot','rings.EddyTracking'],
     py_modules=['rings.ring', 'rings.utils', 'rings.fitt','rings.misc.montecarlo'],
     #packages=find_packages(),

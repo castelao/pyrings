@@ -61,6 +61,8 @@ class v_circular(object):
         #e = 1./(2*n)*ma.sum( vr**2/mag )
         #e = 1./n*ma.sum( vr**2 )
 
+        # I need to do a better job defining the lambda. It's working well,
+        #   but I feel like it could be improved.
         lam = 1e-2
         e = 1./(2*n)*ma.sum( (vr/mag)**2 ) + \
                 lam/2 * (s[2]*p[2] + s[3]*p[3])**2
@@ -97,3 +99,9 @@ def carton_uv(x, y,omega0, delta, alpha):
     u,v = nt2uv(x,y,0,mag)
     return u, v
 
+def carton_scales(omega0, delta, alpha):
+    r = np.arange(0, 400e3, 5e3)
+    v = 0.5*omega0*(r)*np.exp(-(r/delta)**alpha)
+    Vmax = v.max()
+    Rmax = r[v.argmax()]
+    return Vmax, Rmax

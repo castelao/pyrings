@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from setuptools import setup, find_packages
+#from distutils.core import setup
 
 import os
 import sys
@@ -10,12 +11,14 @@ here = os.path.abspath(os.path.dirname(__file__))
 README = "." #open(os.path.join(here, 'README.rst')).read()
 NEWS = "." #open(os.path.join(here, 'NEWS.txt')).read()
 
-install_requires = [
-    'numpy>=1.1', 
-    'fluid'
-]
+install_requires=[
+    "numpy >= 1.1", 
+    "fluid >= 0.1.10",
+    "scipy >= 0.10.1",
+    "pandas >= 0.10.1",
+],
 
-version = '0.7.4'
+version = '0.7.5'
 
 setup(
     name = 'pyrings',
@@ -34,7 +37,7 @@ setup(
         'Topic :: Software Development :: Libraries :: Python Modules',
         ],
     keywords='rings, eddies, ADCP, Gradient Balance',
-    author='Guilherme Castelao, Luiz Irber',
+    author='Guilherme Castelao, Luiz Irber, Ana Villas Boas',
     author_email='guilherme@castelao.net, luiz.irber@gmail.com',
     url='http://pyrings.castelao.net',
     license='PSF',
@@ -42,9 +45,10 @@ setup(
     #download_url="https://pypi.python.org/packages/source/r/rings/",
     download_url="https://pypi.python.org/packages/source/p/pyrings/",
     #py_modules=['rings.rings','rings_plots','rings.okuboweiss','okuboweiss_plot','rings.EddyTracking'],
-    py_modules=['rings.ring', 'rings.utils', 'rings.fitt','rings.misc.montecarlo'],
+    #py_modules=['rings.ring', 'rings.utils', 'rings.fitt','rings.misc.montecarlo'],
     #packages=find_packages(),
-    #packages=['rings'],
+    packages=['rings', 'rings.misc', 'rings.test'],
+    #scripts=['bin/random_walk.py',],
     zip_safe=True,
     install_requires=install_requires,
     platforms = ['any']

@@ -49,7 +49,7 @@ setup(
     #py_modules=['rings.ring', 'rings.utils', 'rings.fitt','rings.misc.montecarlo'],
     #packages=find_packages(),
     packages=['rings', 'rings.misc', 'rings.test'],
-    #scripts=['bin/random_walk.py',],
+    scripts=['bin/run_montecarlo.py',],
     zip_safe=True,
     install_requires=install_requires,
     platforms = ['any']

@@ -37,7 +37,8 @@ from scipy import optimize
 
 from rings.utils import uv2nt
 from rings import fitt
-from fluid.common.common import lonlat2xy, xy2lonlat
+#from fluid.common.common import lonlat2xy, xy2lonlat
+from rings.utils import lonlat2xy, xy2lonlat
 
 
 class Ring(object):

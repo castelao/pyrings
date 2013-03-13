@@ -13,7 +13,6 @@ NEWS = "." #open(os.path.join(here, 'NEWS.txt')).read()
 
 install_requires=[
     "numpy >= 1.1", 
-    "fluid >= 0.1.10",
     "scipy >= 0.10.1",
     "pandas >= 0.10.1",
 ],

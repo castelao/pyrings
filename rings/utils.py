@@ -13,6 +13,48 @@ import numpy
 from numpy import ma
 
 # ============================================================================
+def lonlat2xy(lon,lat,lon_0=None,lat_0=None):
+        """ Convert pairs of (Lat,Lon) into (x,y)
+
+        Input:
+                      Lon [deg]
+          Lat [deg]
+          Lon_0 [deg] => Lon of the origin of the cartesian system
+          Lat_0 [deg] => Lat of the origin of the cartesian system
+        Output:
+                      x [m]
+          y [m]
+
+        The projection is deformed as get away from the center. Since the
+          Latitudes don't deform, the y is estimated first, then for each
+          point is estimated the distante to the meridian of reference
+          (Lon_0) considering the Latitude of the measurement.
+    """
+    if (lat_0==None) or (lon_0==None):
+                lat_0=numpy.median(lat)
+        lon_0=numpy.median(lon)
+    from fluid.common.distance import distance
+    y=distance(lat,0,lat_0,0)
+    y[lat<lat_0]=-1*y[lat<lat_0]
+    x=distance(lat,lon,lat,lon_0)
+    x[lon<lon_0]=-1*x[lon<lon_0]
+    return x,y
+
+# ============================================================================
+def xy2lonlat(x,y,lon_0,lat_0):
+        """ Think how to improve it.1
+    """
+    DEG2RAD = (2*numpy.pi/360)
+    RAD2DEG = 1/DEG2RAD
+    DEG2MIN = 60.
+    DEG2NM  = 60.
+    NM2M   = 1852.    # Defined in Pond & Pickard p303.
+    lat = lat_0+y/(DEG2NM*NM2M)
+    fac = numpy.cos((lat+lat_0)/2.*numpy.pi/180)
+    lon = lon_0+x/(DEG2NM*NM2M)/fac
+    return lon, lat
+
+# ============================================================================
 def uv2nt(x,y,u,v,x_c=0,y_c=0):
     """Convert orthogonal velocity components to normal and tangent ones
 

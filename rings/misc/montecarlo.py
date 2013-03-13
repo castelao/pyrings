@@ -14,10 +14,9 @@ import numpy as np
 from numpy import ma
 from numpy.random import random, randn
 
-from fluid.common.common import xy2lonlat, lonlat2xy
-
 from rings.ring import Ring
-from rings.fitt import carton_uv
+from rings.fitt import carton_uv, carton_scales
+from rings.utils import xy2lonlat, lonlat2xy
 
 
 def synthetic_CLring(x, y, t, cfg):
@@ -99,11 +98,12 @@ def error_estimate(cfg):
     input = {'datetime': d, 'Lon': lon, 'Lat': lat, 'u':u, 'v':v}
     anel = Ring(input)
     # error estimate
-    xt_err, yt_err = lonlat2xy(ma.array([anel['Lon_c']]), ma.array([anel['Lat_c']]), [cfg['ring']['lon_t0']], [cfg['ring']['lat_t0']])
-    #ut_est = anel['uc'] - cfg['u_c']
-    #vt_est = anel['vc'] - cfg['v_c']
+    xc_err, yc_err = lonlat2xy(ma.array([anel['Lon_c']]), ma.array([anel['Lat_c']]), [cfg['ring']['lon_t0']], [cfg['ring']['lat_t0']])
+    uc_err = anel['uc'] - cfg['ring']['u_c']
+    vc_err = anel['vc'] - cfg['ring']['v_c']
     output = cfg.copy()
-    output['output'] = {'xt_err':xt_err[0], 'yt_err':yt_err[0]}
+    output['output'] = {'xc_err':xc_err[0], 'yc_err':yc_err[0],
+            'uc_err':uc_err, 'vc_err':vc_err}
     return output
 
 def random_cfg(cfg):
@@ -132,6 +132,7 @@ def montecarlo(cfg_base, N):
         # Temporary solution
         #output = error_estimate(cfg_tmp)
         results.append( pool.apply_async( error_estimate, (cfg_tmp,) ) )
+    pool.close()
 
     data = []
     for i, r in enumerate(results):
@@ -140,7 +141,10 @@ def montecarlo(cfg_base, N):
         for k in output.keys():
             for kk in output[k].keys():
                 tmp[kk] = output[k][kk]
+        tmp['Vmax'], tmp['Rmax'] = \
+                carton_scales(tmp['omega0'], tmp['delta'], tmp['alpha'])
         data.append(tmp)
+    pool.terminate()
 
     #data = pd.DataFrame(data)
     return data

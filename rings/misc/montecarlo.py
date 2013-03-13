@@ -2,9 +2,8 @@
 # -*- coding: Latin-1 -*-
 # vim: tabstop=4 shiftwidth=4 expandtab
 
-""" Miscelanous functions for the module rings
+""" Miscelanous functions for the Monte Carlo simulations with PyRings
 
-    Mostly things under development
 """
 
 from datetime import datetime, timedelta
@@ -79,7 +78,7 @@ def random_sample_equal_area(N, Rlimit):
     return x, y
 
 def error_estimate(cfg):
-    N = cfg['montecarlo']['N'] 
+    N = cfg['montecarlo']['Nsamples'] 
     # Define the (x,y) sampling positions
     x, y = random_sample_equal_area(N , cfg['montecarlo']['Rlimit'] )
     t = np.arange(N)*cfg['montecarlo']['dt']
@@ -101,9 +100,15 @@ def error_estimate(cfg):
     xc_err, yc_err = lonlat2xy(ma.array([anel['Lon_c']]), ma.array([anel['Lat_c']]), [cfg['ring']['lon_t0']], [cfg['ring']['lat_t0']])
     uc_err = anel['uc'] - cfg['ring']['u_c']
     vc_err = anel['vc'] - cfg['ring']['v_c']
+
+    Vmax, Rmax = \
+                carton_scales(cfg['ring']['omega0'], cfg['ring']['delta'],
+                        cfg['ring']['alpha'])
     output = cfg.copy()
     output['output'] = {'xc_err':xc_err[0], 'yc_err':yc_err[0],
-            'uc_err':uc_err, 'vc_err':vc_err}
+            'uc_err':uc_err, 'vc_err':vc_err, 'Vmax': Vmax, 
+            'Rmax': Rmax}
+
     return output
 
 def random_cfg(cfg):
@@ -141,8 +146,6 @@ def montecarlo(cfg_base, N):
         for k in output.keys():
             for kk in output[k].keys():
                 tmp[kk] = output[k][kk]
-        tmp['Vmax'], tmp['Rmax'] = \
-                carton_scales(tmp['omega0'], tmp['delta'], tmp['alpha'])
         data.append(tmp)
     pool.terminate()
 

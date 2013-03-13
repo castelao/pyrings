@@ -14,7 +14,7 @@ from numpy import ma
 
 # ============================================================================
 def lonlat2xy(lon,lat,lon_0=None,lat_0=None):
-        """ Convert pairs of (Lat,Lon) into (x,y)
+    """ Convert pairs of (Lat,Lon) into (x,y)
 
         Input:
                       Lon [deg]
@@ -42,7 +42,7 @@ def lonlat2xy(lon,lat,lon_0=None,lat_0=None):
 
 # ============================================================================
 def xy2lonlat(x,y,lon_0,lat_0):
-        """ Think how to improve it.1
+    """ Think how to improve it.1
     """
     DEG2RAD = (2*numpy.pi/360)
     RAD2DEG = 1/DEG2RAD

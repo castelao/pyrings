@@ -31,7 +31,7 @@ def lonlat2xy(lon,lat,lon_0=None,lat_0=None):
           (Lon_0) considering the Latitude of the measurement.
     """
     if (lat_0==None) or (lon_0==None):
-                lat_0=numpy.median(lat)
+        lat_0=numpy.median(lat)
         lon_0=numpy.median(lon)
     from fluid.common.distance import distance
     y=distance(lat,0,lat_0,0)

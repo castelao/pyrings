@@ -15,6 +15,7 @@ install_requires=[
     "numpy >= 1.1", 
     "scipy >= 0.10.1",
     "pandas >= 0.10.1",
+    "fluid >= 0.1.10",
 ],
 
 version = '0.7.5'

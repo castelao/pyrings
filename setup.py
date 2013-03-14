@@ -18,7 +18,7 @@ install_requires=[
     "fluid >= 0.1.10",
 ],
 
-version = '0.7.5'
+version = '0.7.6'
 
 setup(
     name = 'pyrings',

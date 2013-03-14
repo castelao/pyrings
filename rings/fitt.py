@@ -27,8 +27,8 @@ class v_circular(object):
     """
     def __init__(self):
         # Escalas
-        self.s = [1e4, 1e4, 1e-1, 1e-1]
-        # xc|yc [10 km], uc|vc [10 cm], lambda
+        self.s = [1e4, 1e4, 1e-2, 1e-2]
+        # xc|yc [10 km], uc|vc [1 cm], lambda
 
         # First guess for the parameters
         # Improve it. Consider the data input to better suggest initial values
@@ -65,7 +65,8 @@ class v_circular(object):
         #   but I feel like it could be improved.
         lam = 1e-2
         e = 1./(2*n)*ma.sum( (vr/mag)**2 ) + \
-                lam/2 * (s[2]*p[2] + s[3]*p[3])**2
+                lam/2 * (s[2]*p[2]**2 + s[3]*p[3]**2)
+                #lam/2 * (s[2]*p[2] + s[3]*p[3])**2
         return e
 
 class v_circular_nontranslating(object):

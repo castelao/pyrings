@@ -86,8 +86,12 @@ def error_estimate(cfg):
     # Estimate the measures
     u, v = synthetic_CLring(x, y, t, cfg['ring'])
     # Add a noise
-    u = u + cfg['montecarlo']['Vnoise_sigma'] * randn(N)
-    v = v + cfg['montecarlo']['Vnoise_sigma'] * randn(N)
+    u_noise = cfg['montecarlo']['Vnoise_sigma'] * randn(N)
+    v_noise = cfg['montecarlo']['Vnoise_sigma'] * randn(N)
+    signoise_ratio = (u**2 + v**2)**0.5 / \
+        (u_noise**2 + v_noise**2)**0.5
+    u = u + u_noise
+    v = v + v_noise
     # Might have a better way to do the line below.
     d0 = datetime(1,1,1)
     d = d0+ma.array([timedelta(seconds=dt) for dt in t])
@@ -107,7 +111,7 @@ def error_estimate(cfg):
     output = cfg.copy()
     output['output'] = {'xc_err':xc_err[0], 'yc_err':yc_err[0],
             'uc_err':uc_err, 'vc_err':vc_err, 'Vmax': Vmax, 
-            'Rmax': Rmax}
+            'Rmax': Rmax, 'signoise_ratio': signoise_ratio}
 
     return output
 

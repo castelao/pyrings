@@ -66,7 +66,6 @@ class v_circular(object):
         lam = 1e-2
         e = 1./(2*n)*ma.sum( (vr/mag)**2 ) + \
                 lam/2 * (s[2]*p[2]**2 + s[3]*p[3]**2)
-                #lam/2 * (s[2]*p[2] + s[3]*p[3])**2
         return e
 
 class v_circular_nontranslating(object):

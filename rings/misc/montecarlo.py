@@ -81,15 +81,19 @@ def error_estimate(cfg):
     N = cfg['montecarlo']['Nsamples'] 
     # Define the (x,y) sampling positions
     x, y = random_sample_equal_area(N , cfg['montecarlo']['Rlimit'] )
+    Rmedian = np.median((x**2+y**2)**0.5)
     t = np.arange(N)*cfg['montecarlo']['dt']
     t = t - np.median(t)
     # Estimate the measures
     u, v = synthetic_CLring(x, y, t, cfg['ring'])
+    Vmedian = np.median((u**2+v**2)**0.5)
     # Add a noise
     u_noise = cfg['montecarlo']['Vnoise_sigma'] * randn(N)
     v_noise = cfg['montecarlo']['Vnoise_sigma'] * randn(N)
-    signoise_ratio = (u**2 + v**2)**0.5 / \
-        (u_noise**2 + v_noise**2)**0.5
+    noisesig_ratio = np.median(
+            (u_noise**2 + v_noise**2)**0.5 / \
+            (u**2 + v**2)**0.5
+            )
     u = u + u_noise
     v = v + v_noise
     # Might have a better way to do the line below.
@@ -111,7 +115,8 @@ def error_estimate(cfg):
     output = cfg.copy()
     output['output'] = {'xc_err':xc_err[0], 'yc_err':yc_err[0],
             'uc_err':uc_err, 'vc_err':vc_err, 'Vmax': Vmax, 
-            'Rmax': Rmax, 'signoise_ratio': signoise_ratio}
+            'Rmax': Rmax, 'noisesig_ratio': noisesig_ratio,
+            'Rmedian': Rmedian, 'Vmedian':Vmedian}
 
     return output
 

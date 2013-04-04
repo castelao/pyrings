@@ -77,6 +77,11 @@ def random_sample_equal_area(N, Rlimit):
         ind = np.nonzero(r>Rlimit)[0]
     return x, y
 
+#def regulargrid_sample(N, Rlimit):
+#    """
+#    """
+#    N = int(round(N**0.5))**2
+
 def error_estimate(cfg):
     N = cfg['montecarlo']['Nsamples'] 
     # Define the (x,y) sampling positions
@@ -113,10 +118,12 @@ def error_estimate(cfg):
                 carton_scales(cfg['ring']['omega0'], cfg['ring']['delta'],
                         cfg['ring']['alpha'])
     output = cfg.copy()
-    output['output'] = {'xc_err':xc_err[0], 'yc_err':yc_err[0],
-            'uc_err':uc_err, 'vc_err':vc_err, 'Vmax': Vmax, 
+    output['output'] = {'xc_err': xc_err[0], 'yc_err': yc_err[0],
+            'x_median': np.median(x), 'y_median': np.median(y),
+            'uc_err': uc_err, 'vc_err': vc_err, 'Vmax': Vmax, 
             'Rmax': Rmax, 'noisesig_ratio': noisesig_ratio,
-            'Rmedian': Rmedian, 'Vmedian':Vmedian}
+            'Rmedian': Rmedian, 'Vmedian': Vmedian,
+            'opt_stat': anel.opt_stat}
 
     return output
 

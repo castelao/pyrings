@@ -146,6 +146,15 @@ class Ring(object):
 
     def go(self):
         """
+EINVAL       = -2 # Invalid parameters (n<1)
+INFEASIBLE   = -1 # Infeasible (low > up)
+LOCALMINIMUM =  0 # Local minima reach (|pg| ~= 0)
+CONVERGED    =  1 # Converged (|f_n-f_(n-1)| ~= 0)
+MAXFUN       =  2 # Max. number of function evaluations reach
+LSFAIL       =  3 # Linear search failed
+CONSTANT     =  4 # All lower bounds are equal to the upper bounds
+NOPROGRESS   =  5 # Unable to progress
+USERABORT    =  6 # User requested end of minimization
         """
         verbose = 0
         args = (self.data['t'], self.data['x'], self.data['y'],

@@ -26,6 +26,10 @@
     %    J = \frac{1}{2N} \sum \left( v_{\theta CL} - v_{\theta} \right)^2
     %    %J = \frac{1}{2N} \sum \left( v_{\theta CL}^2 + v_r^2 - |V|^2 \right)^2
     %\end{displaymath}
+
+
+    Another idea, include uncertain on the data. That would allow to use
+      different datasets and give different weights for each type of data.
 """
 
 #import logging
@@ -143,10 +147,12 @@ class Ring(object):
     def go(self):
         """
         """
+        verbose = 0
         args = (self.data['t'], self.data['x'], self.data['y'],
                 self.input['u'], self.input['v'])
         f = fitt.v_circular()
-        op = optimize.fmin_tnc(f.cost, f.p0, fprime=None,  args=args, approx_grad=1,  bounds = None, epsilon=1e-08, scale=None, offset=None, messages=15, maxCGit=-1, maxfun=500, eta=-1, stepmx=0, accuracy=0, fmin=0, ftol=-1, xtol=-1, pgtol=-1, rescale=-1, disp=5)
+        op = optimize.fmin_tnc(f.cost, f.p0, fprime=None,  args=args, approx_grad=1,  bounds=None, epsilon=1e-08, scale=None, offset=None, messages=15, maxCGit=-1, maxfun=500, eta=-1, stepmx=0, accuracy=0, fmin=0, ftol=-1, xtol=-1, pgtol=-1, rescale=-1, disp=verbose)
+
         p = op[0]   # Output fitting parameters
         self.data['xc'] = f.s[0]*p[0]
         self.data['yc'] = f.s[1]*p[1]

@@ -151,6 +151,9 @@ class Ring(object):
         args = (self.data['t'], self.data['x'], self.data['y'],
                 self.input['u'], self.input['v'])
         f = fitt.v_circular()
+        f.set_p0(self.data['x'], self.data['y'],
+                self.input['u'], self.input['v'])
+        f = fitt.v_circular()
         op = optimize.fmin_tnc(f.cost, f.p0, fprime=None,  args=args, approx_grad=1,  bounds=None, epsilon=1e-08, scale=None, offset=None, messages=15, maxCGit=-1, maxfun=500, eta=-1, stepmx=0, accuracy=0, fmin=0, ftol=-1, xtol=-1, pgtol=-1, rescale=-1, disp=verbose)
 
         p = op[0]   # Output fitting parameters

@@ -36,9 +36,18 @@ class v_circular(object):
         # Consider to migrate for named tuples or dictionary.
         self.p0 = [-1, -1, .1, .1]
 
+        # I need to do a better job defining the lambda. It's working well,
+        #   but I feel like it could be improved.
+        self.lamb = 1e-2
+
     #def set_p0(self, p0=None):
-    #    if p0 == None:
-    #        self.p0 = [-1, -1, .1, .1]
+    def set_p0(self, x, y, u, v):
+        #    if p0 == None:
+        #        self.p0 = [-1, -1, .1, .1]
+        self.p0[0] = np.median(x)/self.s[0]
+        self.p0[1] = np.median(y)/self.s[1]
+        self.p0[2] = np.median(u)/self.s[2]
+        self.p0[3] = np.median(v)/self.s[3]
 
     def cost(self, p, dt, x, y, u, v):
         """
@@ -61,12 +70,9 @@ class v_circular(object):
         #e = 1./(2*n)*ma.sum( vr**2/mag )
         #e = 1./n*ma.sum( vr**2 )
 
-        # I need to do a better job defining the lambda. It's working well,
-        #   but I feel like it could be improved.
-        lam = 1e-2
-        e = 1./(2*n)*ma.sum( (vr/mag)**2 ) + \
-                lam/2 * (s[2]*p[2]**2 + s[3]*p[3]**2)
-        return e
+        j = 1./(2*n)*ma.sum( (vr/mag)**2 ) + \
+                self.lamb/2 * (s[2]*p[2]**2 + s[3]*p[3]**2)
+        return j
 
 class v_circular_nontranslating(object):
     def __init__(self):

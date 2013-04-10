@@ -146,6 +146,7 @@ class Ring(object):
 
     def go(self):
         """
+optimize.tnc.RCSTRINGS
 EINVAL       = -2 # Invalid parameters (n<1)
 INFEASIBLE   = -1 # Infeasible (low > up)
 LOCALMINIMUM =  0 # Local minima reach (|pg| ~= 0)

@@ -64,11 +64,8 @@ class v_circular(object):
         mag = (u**2+v**2)**0.5
         #vt = -u*ma.sin(ma.arctan2(y-p[1], x-p[0])) + \
         #      v*ma.cos(ma.arctan2(y-p[1], x-p[0]))
-        #e = 1./(2*n)*ma.sum( (vr/mag)**2 )
-        # Penalized version
         # Maybe
         #e = 1./(2*n)*ma.sum( vr**2/mag )
-        #e = 1./n*ma.sum( vr**2 )
 
         j = 1./(2*n)*ma.sum( (vr/mag)**2 ) + \
                 self.lamb/2 * (s[2]*p[2]**2 + s[3]*p[3]**2)

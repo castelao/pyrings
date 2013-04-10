@@ -86,20 +86,32 @@ def regulargrid_sample(N, Rlimit):
     r2 = (x**2 + y**2)
     #ind = np.argsort(r2)<N # Starts on 0, so < not <=
     ind = np.argsort(r2.flatten())[:N]
-    return x.flatten()[ind], y.flatten()[ind]
+    return ma.array(x.flatten()[ind]), \
+            ma.array(y.flatten()[ind])
 
-#def drifter_sample(N, cfg):
+def drifter_sample(N, cfg):
+    dt = 6*3600 #cfg['montecarlo']['dt']
+    # Initial position
+    t = np.arange(N)*cfg['montecarlo']['dt']
+    t = t - np.median(t)
+    x, y, u, v = ma.masked_all(N), ma.masked_all(N),ma.masked_all(N),ma.masked_all(N),
+    x[0], y[0] = (2*random(2)-1)*cfg['montecarlo']['Rlimit']
+    u[0], v[0] = synthetic_CLring(x[0], y[0], t[0], cfg['ring'])
+    for n in range(1,N): 
+        x[n], y[n] = x[n-1]+u[n-1]*dt, y[n-1]+v[n-1]*dt
+        u[n], v[n] = synthetic_CLring(x[n], y[n], t[n], cfg['ring'])
+
 
 def error_estimate(cfg):
     N = cfg['montecarlo']['Nsamples'] 
-    t = np.arange(N)*cfg['montecarlo']['dt']
+    t = np.arange(N, dtype='i')*cfg['montecarlo']['dt']
     t = t - np.median(t)
     # Define the (x,y) sampling positions
     if cfg['montecarlo']['sampling_type'] == 'equal_area':
         x, y = random_sample_equal_area(N , cfg['montecarlo']['Rlimit'])
     elif cfg['montecarlo']['sampling_type'] == 'drunken_drive':
         x, y = drunken_drive(N, step=1) #, x0=0, y0=0)
-    elif cfg['montecarlo']['sampling_type'] == 'regulargrid_sample':
+    elif cfg['montecarlo']['sampling_type'] == 'regulargrid':
         x, y = regulargrid_sample(N, cfg['montecarlo']['Rlimit'])
 
     Rmedian = np.median((x**2+y**2)**0.5)
@@ -116,7 +128,7 @@ def error_estimate(cfg):
     u = u + u_noise
     v = v + v_noise
     # Might have a better way to do the line below.
-    d0 = datetime(1,1,1)
+    d0 = datetime(2000,1,1)
     d = d0+ma.array([timedelta(seconds=dt) for dt in t])
     # Transform x,y into lon, lat
     lon, lat = xy2lonlat(x, y, cfg['ring']['lon_t0'], cfg['ring']['lat_t0'])

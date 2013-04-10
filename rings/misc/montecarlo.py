@@ -99,7 +99,7 @@ def error_estimate(cfg):
         x, y = random_sample_equal_area(N , cfg['montecarlo']['Rlimit'])
     elif cfg['montecarlo']['sampling_type'] == 'drunken_drive':
         x, y = drunken_drive(N, step=1) #, x0=0, y0=0)
-    else: # Default is the regular grid
+    elif cfg['montecarlo']['sampling_type'] == 'regulargrid_sample':
         x, y = regulargrid_sample(N, cfg['montecarlo']['Rlimit'])
 
     Rmedian = np.median((x**2+y**2)**0.5)

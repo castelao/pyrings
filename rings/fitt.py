@@ -79,6 +79,12 @@ class v_circular_nontranslating(object):
         # Escalas
         self.s = [1e4, 1e4]
 
+        self.p0 = [-1, -1]
+
+    def set_p0(self, x, y, u, v):
+        self.p0[0] = np.median(x)/self.s[0]
+        self.p0[1] = np.median(y)/self.s[1]
+
     def cost(self, p, x, y, u, v):
         """
         """
@@ -90,9 +96,8 @@ class v_circular_nontranslating(object):
         mag = (u**2+v**2)**0.5
         #vt = -u*ma.sin(ma.arctan2(y-p[1], x-p[0])) + \
         #      v*ma.cos(ma.arctan2(y-p[1], x-p[0]))
-        e = 1./n*ma.sum( (vr/mag)**2 )
-        #e = 1./n*ma.sum( vr**2 )
-        return e
+        j = 1./(2*n)*ma.sum( (vr/mag)**2 )
+        return j
 
 # =========================
 # Moving carton_uv to here just to be able to run the Monte Carlo tests,

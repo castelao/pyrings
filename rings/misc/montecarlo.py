@@ -77,18 +77,32 @@ def random_sample_equal_area(N, Rlimit):
         ind = np.nonzero(r>Rlimit)[0]
     return x, y
 
-#def regulargrid_sample(N, Rlimit):
-#    """
-#    """
-#    N = int(round(N**0.5))**2
+def regulargrid_sample(N, Rlimit):
+    """
+    """
+    grid_side = int(np.ceil(N**0.5))
+    x = np.linspace(-Rlimit,Rlimit,grid_side)
+    x, y = np.meshgrid(x, x)
+    r2 = (x**2 + y**2)
+    #ind = np.argsort(r2)<N # Starts on 0, so < not <=
+    ind = np.argsort(r2.flatten())[:N]
+    return x.flatten()[ind], y.flatten()[ind]
+
+#def drifter_sample(N, cfg):
 
 def error_estimate(cfg):
     N = cfg['montecarlo']['Nsamples'] 
-    # Define the (x,y) sampling positions
-    x, y = random_sample_equal_area(N , cfg['montecarlo']['Rlimit'] )
-    Rmedian = np.median((x**2+y**2)**0.5)
     t = np.arange(N)*cfg['montecarlo']['dt']
     t = t - np.median(t)
+    # Define the (x,y) sampling positions
+    if cfg['montecarlo']['sampling_type'] == 'equal_area':
+        x, y = random_sample_equal_area(N , cfg['montecarlo']['Rlimit'])
+    elif cfg['montecarlo']['sampling_type'] == 'drunken_drive':
+        x, y = drunken_drive(N, step=1) #, x0=0, y0=0)
+    else: # Default is the regular grid
+        x, y = regulargrid_sample(N, cfg['montecarlo']['Rlimit'])
+
+    Rmedian = np.median((x**2+y**2)**0.5)
     # Estimate the measures
     u, v = synthetic_CLring(x, y, t, cfg['ring'])
     Vmedian = np.median((u**2+v**2)**0.5)

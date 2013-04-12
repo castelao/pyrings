@@ -13,13 +13,6 @@ from rings.utils import uv2nt, nt2uv
 class v_circular(object):
     """
 
-        Recomendation from the paper reviewer! Include the
-          penalty function for the translation speed. Old eq. 7,
-          eq. 11 on the new version.
-          J = \frac{1}{2N} \sum_{n=1}^{N}
-              \frac{{v_{r}^2}_n}{|V_n|}
-            + \frac{\lambda}{2} (u_{cn} + v_{cn})^2.
-
         I'm not sure how would be the best way to include the
           penalty factor lambda. Might be a good idea to depend on
           the number of available observations. More observations,

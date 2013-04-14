@@ -84,8 +84,6 @@ class v_circular_nontranslating(object):
         s = self.s
         vr, vt = uv2nt(x, y, u, v, x_c=s[0]*p[0], y_c=s[1]*p[1])
         mag = (u**2+v**2)**0.5
-        #vt = -u*ma.sin(ma.arctan2(y-p[1], x-p[0])) + \
-        #      v*ma.cos(ma.arctan2(y-p[1], x-p[0]))
         j = 1./(2*n)*ma.sum( (vr/mag)**2 )
         return j
 

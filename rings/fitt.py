@@ -17,6 +17,9 @@ class v_circular(object):
           penalty factor lambda. Might be a good idea to depend on
           the number of available observations. More observations,
           less succetible it is to the over fitting effect.
+
+        I should probably do first a fit as a non-translating case
+          and only then try to do a translating.
     """
     def __init__(self):
         # Escalas
@@ -27,11 +30,11 @@ class v_circular(object):
         # Improve it. Consider the data input to better suggest initial values
         #   like x0 as the median of x, or eta0 as marximum/minimum eta.
         # Consider to migrate for named tuples or dictionary.
-        self.p0 = [-1, -1, .1, .1]
+        self.p0 = [-1, -1, .01, .01]
 
         # I need to do a better job defining the lambda. It's working well,
         #   but I feel like it could be improved.
-        self.lamb = 1e-2
+        self.lamb = 1e-1
 
     #def set_p0(self, p0=None):
     def set_p0(self, x, y, u, v):
@@ -39,8 +42,8 @@ class v_circular(object):
         #        self.p0 = [-1, -1, .1, .1]
         self.p0[0] = np.median(x)/self.s[0]
         self.p0[1] = np.median(y)/self.s[1]
-        self.p0[2] = np.median(u)/self.s[2]
-        self.p0[3] = np.median(v)/self.s[3]
+        #self.p0[2] = np.median(u)/self.s[2]
+        #self.p0[3] = np.median(v)/self.s[3]
 
     def cost(self, p, dt, x, y, u, v):
         """

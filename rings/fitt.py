@@ -38,10 +38,14 @@ class v_circular(object):
 
     #def set_p0(self, p0=None):
     def set_p0(self, x, y, u, v):
+        """
+
+            Don't like to start with zeros. Improve this here.
+        """
         #    if p0 == None:
         #        self.p0 = [-1, -1, .1, .1]
-        self.p0[0] = np.median(x)/self.s[0]
-        self.p0[1] = np.median(y)/self.s[1]
+        self.p0[0] = np.median(x)/self.s[0] + 1e-2
+        self.p0[1] = np.median(y)/self.s[1] + 1e-2
         #self.p0[2] = np.median(u)/self.s[2]
         #self.p0[3] = np.median(v)/self.s[3]
 

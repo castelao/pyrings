@@ -13,21 +13,6 @@
       purposes.
     http://docs.python.org/library/collections.html#collections.namedtuple
 
-    Saving this notes from a modified version of the paper.
-    %\note{Point the solid body inner core, hence CL would be a good model.}
-    %
-    %\citet{CartonLegras1994}
-    %
-    %\begin{displaymath}
-    %    v_{\theta CL} = \frac{1}{2} \omega_0 r \exp \left( - \left( \frac{r}{\delta} \right)^\alpha \right)
-    %\end{displaymath}
-    %\begin{displaymath}
-    %    %J = \frac{1}{2N} \sum_{n=1}^{N} \left( v_{\theta CL \ n} - v_{\theta n} \right)^2
-    %    J = \frac{1}{2N} \sum \left( v_{\theta CL} - v_{\theta} \right)^2
-    %    %J = \frac{1}{2N} \sum \left( v_{\theta CL}^2 + v_r^2 - |V|^2 \right)^2
-    %\end{displaymath}
-
-
     Another idea, include uncertain on the data. That would allow to use
       different datasets and give different weights for each type of data.
 """

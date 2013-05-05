@@ -34,7 +34,7 @@ class v_circular(object):
 
         # I need to do a better job defining the lambda. It's working well,
         #   but I feel like it could be improved.
-        self.lamb = 1e-3
+        self.lamb = 1e-2
 
     #def set_p0(self, p0=None):
     def set_p0(self, x, y, u, v):

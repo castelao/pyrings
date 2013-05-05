@@ -99,11 +99,14 @@ class Ring(object):
             Most of the procedures are based on cartesian distances. This
               function define x and y distance from lat_ref, lon_ref.
         """
+        if ('x' in self.input) & ('y' in self.input):
+            self.data['x'] = self.input['x']
+            self.data['y'] = self.input['y']
+            print "It will be used the x and y given as input"
 
-        self.data['x'], self.data['y'] = lonlat2xy(self.input['Lon'],
-                                         self.input['Lat'],
-                                         lat_0=self.lat_ref,
-                                         lon_0=self.lon_ref)
+        else:
+            self.data['x'], self.data['y'] = lonlat2xy(self.input['Lon'], 
+                    self.input['Lat'], lat_0=self.lat_ref, lon_0=self.lon_ref)
 
         #if ('u' in self.center) & ('v' in self.center):
         #    self['x_r'] = self['x']-self.center['u']*self['dt']

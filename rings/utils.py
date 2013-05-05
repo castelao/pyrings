@@ -177,6 +177,8 @@ def basic_logger(logname="Generic", logfile=None):
 def cfg2dict(cfg_file):
     """Extract all variables from a ConfigParser file and create a dict[section][option]
 
+        !!ATENTION!!, migrate it to YAML.
+
     """
     cfg = ConfigParser.SafeConfigParser()
     try:
@@ -374,57 +376,6 @@ def neighbor_cluster(ind, verbose=False):
             output[gi[0],gj[0]] = g
             gi, gj = gi[1:], gj[1:]
     return output
-
-# ============================================================================
-
-
-def vortex_3Dpatches(data,logger=None):
-    """
-    """
-    id3d = ma.masked_all(data['id'].shape,dtype='i')
-    id3d[0]=data['id'][0]
-    for zn in range(1,data['id'].shape[0]):
-        for id in set(data['id'][zn].compressed()):
-            eddy_index=data['id'][zn]==id
-            possible=[p for p in set((id3d[zn-1][eddy_index]).compressed())]
-            if len(possible)==0:
-                id3d.data[zn][eddy_index]=(id3d.max()+1)
-                id3d.mask[zn][eddy_index]=False
-            elif len(possible)>0:
-                import rpy2.robjects as robjects
-                criteria={'p':ma.masked_all(len(possible)),'cor':ma.masked_all(len(possible)),'conf.min':ma.masked_all(len(possible)),'n':ma.masked_all(len(possible),dtype='i')}
-                for pn,p in enumerate(possible):
-                    #possible_index=output['id'][zn-1]==p
-                    possible_index=id3d[zn-1]==p
-                    index = possible_index & eddy_index
-                    # ----
-                    # Check if the common area is at least half of the smaller eddy level
-                    if (len(speed[zn][index])) < 0.65*(min(len(speed[zn-1][possible_index]),len(speed[zn][eddy_index]))):
-                        criteria['p'][pn]=p
-                        criteria['cor'][pn]=0
-                        criteria['conf.min'][pn]=0
-                    else:
-                        c = robjects.r['cor.test'](robjects.FloatVector(speed[zn-1][index]),robjects.FloatVector(speed[zn][index]))
-                        criteria['p'][pn]=p
-                        criteria['cor'][pn]=c.r['estimate'][0][0]
-                        criteria['conf.min'][pn]=c.r['conf.int'][0][0]
-                        criteria['n'][pn] = len(speed[zn][index])
-                tmp=(criteria['cor']>.85) & (criteria['conf.min']>.65)
-                if tmp.any():
-                    possible=criteria['p'][tmp]
-                    if len(possible)==1:
-                        id3d.data[zn][eddy_index]=possible[0].astype('i')
-                        id3d.mask[zn][eddy_index]=False
-                    else:
-                        theone = possible.min()
-                        id3d.data[zn][eddy_index]=theone
-                        id3d.mask[zn][eddy_index]=False
-                        for pp in [p for p in possible if p!=theone]:
-                            id3d.data[id3d==pp]=theone
-                else:
-                    id3d.data[zn][eddy_index]=(id3d.max()+1)
-                    id3d.mask[zn][eddy_index]=False
-    return id3d
 
 # ============================================================================
 # ============================================================================

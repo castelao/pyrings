@@ -161,9 +161,11 @@ USERABORT    =  6 # User requested end of minimization
         args = (self.data['t'], self.data['x'], self.data['y'],
                 self.input['u'], self.input['v'])
         f = fitt.v_circular()
-        f.set_p0(self.data['x'], self.data['y'],
-                self.input['u'], self.input['v'])
-        bounds = None #[(None,None), (None,None), (None,None), [(None,None)]
+        #f.lamb = 1e-2
+        #f = fitt.v_circular_nontranslating()
+        #f.set_p0(self.data['x'], self.data['y'],
+        #        self.input['u'], self.input['v'])
+        bounds = None #[(None,None), (None,None), (None,None), (None,None)]
         op = optimize.fmin_tnc(f.cost, f.p0, fprime=None,  args=args, 
                 approx_grad=1,  bounds=bounds, epsilon=1e-08, scale=None, 
                 offset=None, messages=15, maxCGit=-1, maxfun=500, eta=-1, 

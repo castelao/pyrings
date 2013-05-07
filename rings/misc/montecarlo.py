@@ -89,17 +89,20 @@ def regulargrid_sample(N, Rlimit):
     return ma.array(x.flatten()[ind]), \
             ma.array(y.flatten()[ind])
 
-def drifter_sample(N, cfg):
-    dt = 6*3600 #cfg['montecarlo']['dt']
+def drifter_sample(cfg):
+    N = cfg['montecarlo']['Nsamples']
+    dt = cfg['montecarlo']['dt']
     # Initial position
-    t = np.arange(N)*cfg['montecarlo']['dt']
-    t = t - np.median(t)
+    t = np.arange(N)*dt
     x, y, u, v = ma.masked_all(N), ma.masked_all(N),ma.masked_all(N),ma.masked_all(N),
     x[0], y[0] = (2*random(2)-1)*cfg['montecarlo']['Rlimit']
     u[0], v[0] = synthetic_CLring(x[0], y[0], t[0], cfg['ring'])
     for n in range(1,N): 
         x[n], y[n] = x[n-1]+u[n-1]*dt, y[n-1]+v[n-1]*dt
         u[n], v[n] = synthetic_CLring(x[n], y[n], t[n], cfg['ring'])
+        print x[n], y[n], u[n], v[n]
+    t = t - np.median(t)
+    return {'t': t, 'x':x, 'y':y, 'u':u, 'v':v}
 
 
 def error_estimate(cfg):

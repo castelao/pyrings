@@ -38,11 +38,33 @@ class Ring(object):
 
         Input:
           data:
-            Lat: Latitude
-            Lon: Longitude
-            datetime: Time [datetime]
+              | Lat: Latitude
+              | Lon: Longitude
+              | or
+              | X: x position
+              | Y: y position
+
+              | datetime: Time [datetime]
+              | or
+              | seconds
             u: u component of velocity
             v: v component of velocity
+    """
+    pass
+
+class RingCenter(object):
+    """ A class to deal with Rings
+
+        Maybe should split in two classes, one for eta inputs and other for
+          velocities input.
+
+        Input:
+          data:
+            x: x position
+            y: y position
+            t: time [seconds]
+            u: u component of velocity [m/s]
+            v: v component of velocity [m/s [m/s]]
     """
 
     def __init__(self, input, metadata={}, auto=True, **keywords):
@@ -55,24 +77,25 @@ class Ring(object):
 
         self._set_default_values(keywords)
 
-        self.set_xy()
+        #self.set_xy()
         self.set_t()
 
         self.go()
         self.set_xy()   # Redefine the positions, discounting the uc|vc
         self.set_cilyndrical_components()
 
-
     def keys(self):
+        """ .keys is composed from input + data elements
+        """
         k = list(self.data.keys())
         k.extend(self.input.keys())
         return k
 
     def __getitem__(self, key):
         try:
-            return self.input[key]
-        except:
             return self.data[key]
+        except:
+            return self.input[key]
 
     def _set_default_values(self, keywords):
         """
@@ -84,14 +107,14 @@ class Ring(object):
             self.center = {}
 
         # Lat, Lon of the origin of the coordinate system, i.e.  (x,y)
-        if (not hasattr(self, 'lat_ref')) & (not hasattr(self, 'lon_ref')):
-            try:
-                self.lat_ref = self.center['lat']
-                self.lon_ref = self.center['lon']
-            #except AttributeError:
-            except KeyError:
-                self.lat_ref = ma.median(self.input['Lat'])
-                self.lon_ref = ma.median(self.input['Lon'])
+        #if (not hasattr(self, 'lat_ref')) & (not hasattr(self, 'lon_ref')):
+        #    try:
+        #        self.lat_ref = self.center['lat']
+        #        self.lon_ref = self.center['lon']
+        #    #except AttributeError:
+        #    except KeyError:
+        #        self.lat_ref = ma.median(self.input['Lat'])
+        #        self.lon_ref = ma.median(self.input['Lon'])
 
     def set_xy(self):
         """ Set x, y coordinates from Lat, Lon.
@@ -121,16 +144,18 @@ class Ring(object):
             It's not the most efficient way, but is done to work well with any
               datetime dimension.
         """
-        t0 = min(self['datetime'])
-        dt = ma.array([dt.total_seconds() for dt in self['datetime'] - t0])
-        dt_median = ma.median(dt)
-        self.t_ref = t0+timedelta(seconds = dt_median)
-        self.data['t'] = dt-dt_median
+        #t0 = min(self['datetime'])
+        #dt = ma.array([dt.total_seconds() for dt in self['datetime'] - t0])
+        #dt_median = ma.median(dt)
+        #self.t_ref = t0+timedelta(seconds = dt_median)
+        #self.data['t'] = dt-dt_median
+        self.data['t'] = self.input['t'] - np.median(self.input['t'])
 
     def set_cilyndrical_components(self):
         self.data['r'] = (self.data['x']**2 + self.data['y']**2)**0.5
         self.data['vrad'], self.data['vtan'] = uv2nt(self['x'], self['y'],
-                self['u'], self['v'], x_c=self['xc'], y_c=self['yc'])
+                self['u'], self['v'],
+                x_c=self.center['x'], y_c=self.center['y'])
 
     def go(self):
         """
@@ -146,7 +171,7 @@ NOPROGRESS   =  5 # Unable to progress
 USERABORT    =  6 # User requested end of minimization
         """
         verbose = 0
-        args = (self.data['t'], self.data['x'], self.data['y'],
+        args = (self.data['t'], self.input['x'], self.input['y'],
                 self.input['u'], self.input['v'])
         f = fitt.v_circular()
         #f.lamb = 1e-2
@@ -163,18 +188,23 @@ USERABORT    =  6 # User requested end of minimization
         self.opt_stat = op[2]
 
         p = op[0]   # Output fitting parameters
-        self.data['xc'] = f.s[0]*p[0]
-        self.data['yc'] = f.s[1]*p[1]
-        self.data['uc'] = f.s[2]*p[2]
-        self.data['vc'] = f.s[3]*p[3]
+        #self.data['xc'] = f.s[0]*p[0]
+        #self.data['yc'] = f.s[1]*p[1]
+        #self.data['uc'] = f.s[2]*p[2]
+        #self.data['vc'] = f.s[3]*p[3]
+        center = { 'x': f.s[0]*p[0],
+                'y': f.s[1]*p[1],
+                'u': f.s[2]*p[2],
+                'v': f.s[3]*p[3]}
+        self.center = center
 
-        self.data['xr'] = self.data['x'] - self.data['t']*self.data['uc']
-        self.data['yr'] = self.data['y'] - self.data['t']*self.data['vc']
-        self.data['ur'] = self.input['u'] - self.data['uc']
-        self.data['vr'] = self.input['v'] - self.data['vc']
+        self.data['xr'] = self.input['x'] - self.data['t']*center['u']
+        self.data['yr'] = self.input['y'] - self.data['t']*center['v']
+        self.data['ur'] = self.input['u'] - center['u']
+        self.data['vr'] = self.input['v'] - center['v']
 
-        self.data['Lon_c'], self.data['Lat_c'] = xy2lonlat(self.data['xc'],
-                self.data['yc'], self.lon_ref, self.lat_ref)
+        #self.data['Lon_c'], self.data['Lat_c'] = xy2lonlat(self.data['xc'],
+        #        self.data['yc'], self.lon_ref, self.lat_ref)
 
     def plot(self):
         import pylab

@@ -77,12 +77,13 @@ class RingCenter(object):
 
         self._set_default_values(keywords)
 
-        #self.set_xy()
-        self.set_t()
+        if auto == True:
+            #self.set_xy()
+            self.set_t()
 
-        self.go()
-        self.set_xy()   # Redefine the positions, discounting the uc|vc
-        self.set_cilyndrical_components()
+            self.findcenter()
+            self.set_xy()   # Redefine the positions, discounting the uc|vc
+            self.set_cilyndrical_components()
 
     def keys(self):
         """ .keys is composed from input + data elements
@@ -160,7 +161,7 @@ class RingCenter(object):
                 self['u'], self['v'],
                 x_c=self.center['x'], y_c=self.center['y'])
 
-    def go(self):
+    def findcenter(self):
         """
 optimize.tnc.RCSTRINGS
 EINVAL       = -2 # Invalid parameters (n<1)
@@ -208,17 +209,17 @@ USERABORT    =  6 # User requested end of minimization
         #self.data['Lon_c'], self.data['Lat_c'] = xy2lonlat(self.data['xc'],
         #        self.data['yc'], self.lon_ref, self.lat_ref)
 
-    def plot(self):
-        import pylab
-        #import pdb; pdb.set_trace()
-        pylab.quiver(self.data['x'], self.data['y'], self.input['u'],
-                self.input['v'], color='r')
-        pylab.quiver(self.data['xr'], self.data['yr'], self.data['ur'], self.data['vr'])
-        pylab.plot(self.data['xc'], self.data['yc'], 'ro')
-        pylab.figure()
-        pylab.plot(self.data['r'], self.data['vtan'], 'r')
-        pylab.plot(self.data['r'], self.data['vrad'], 'g')
-        pylab.show()
+def plot_ring(self):
+    import pylab
+    #import pdb; pdb.set_trace()
+    pylab.quiver(self.data['x'], self.data['y'], self.input['u'],
+            self.input['v'], color='r')
+    pylab.quiver(self.data['xr'], self.data['yr'], self.data['ur'], self.data['vr'])
+    pylab.plot(self.data['xc'], self.data['yc'], 'ro')
+    pylab.figure()
+    pylab.plot(self.data['r'], self.data['vtan'], 'r')
+    pylab.plot(self.data['r'], self.data['vrad'], 'g')
+    pylab.show()
 
 
 # ============================================================================

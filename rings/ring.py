@@ -149,7 +149,10 @@ class RingCenter(object):
         #dt_median = ma.median(dt)
         #self.t_ref = t0+timedelta(seconds = dt_median)
         #self.data['t'] = dt-dt_median
-        self.data['t'] = self.input['t'] - np.median(self.input['t'])
+        #if ('t' not in self.keys()) & ('datetime' in self.keys()):
+        #self.data['t'] = self.input['t'] - np.median(self.input['t'])
+
+        #self.center['t']
 
     def set_cilyndrical_components(self):
         self.data['r'] = (self.data['x']**2 + self.data['y']**2)**0.5
@@ -171,8 +174,8 @@ NOPROGRESS   =  5 # Unable to progress
 USERABORT    =  6 # User requested end of minimization
         """
         verbose = 0
-        args = (self.data['t'], self.input['x'], self.input['y'],
-                self.input['u'], self.input['v'])
+        args = (self['t'], self['x'], self['y'],
+                self['u'], self['v'])
         f = fitt.v_circular()
         #f.lamb = 1e-2
         #f = fitt.v_circular_nontranslating()
@@ -192,16 +195,15 @@ USERABORT    =  6 # User requested end of minimization
         #self.data['yc'] = f.s[1]*p[1]
         #self.data['uc'] = f.s[2]*p[2]
         #self.data['vc'] = f.s[3]*p[3]
-        center = { 'x': f.s[0]*p[0],
-                'y': f.s[1]*p[1],
-                'u': f.s[2]*p[2],
-                'v': f.s[3]*p[3]}
-        self.center = center
+        self.center['x'] = f.s[0]*p[0]
+        self.center['y'] = f.s[1]*p[1]
+        self.center['u'] = f.s[2]*p[2]
+        self.center['v'] = f.s[3]*p[3]
 
-        self.data['xr'] = self.input['x'] - self.data['t']*center['u']
-        self.data['yr'] = self.input['y'] - self.data['t']*center['v']
-        self.data['ur'] = self.input['u'] - center['u']
-        self.data['vr'] = self.input['v'] - center['v']
+        self.data['xr'] = self.input['x'] - self['t']*self.center['u']
+        self.data['yr'] = self.input['y'] - self['t']*self.center['v']
+        self.data['ur'] = self.input['u'] - self.center['u']
+        self.data['vr'] = self.input['v'] - self.center['v']
 
         #self.data['Lon_c'], self.data['Lat_c'] = xy2lonlat(self.data['xc'],
         #        self.data['yc'], self.lon_ref, self.lat_ref)

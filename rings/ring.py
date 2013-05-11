@@ -53,7 +53,7 @@ class Ring(object):
     pass
 
 class RingCenter(object):
-    """ A class to deal with Rings
+    """ A class to find the ring center.
 
         Maybe should split in two classes, one for eta inputs and other for
           velocities input.
@@ -70,7 +70,6 @@ class RingCenter(object):
     def __init__(self, input, metadata={}, auto=True, **keywords):
         """
         """
-
         self.input = input
         self.data = {}
         self.metadata = metadata
@@ -78,11 +77,8 @@ class RingCenter(object):
         self._set_default_values(keywords)
 
         if auto == True:
-            #self.set_xy()
             #self.set_t()
-
             self.findcenter()
-            #self.set_xy()   # Redefine the positions, discounting the uc|vc
             self.set_cilyndrical_components()
 
     def keys(self):
@@ -97,6 +93,117 @@ class RingCenter(object):
             return self.data[key]
         except:
             return self.input[key]
+
+    def _set_default_values(self, keywords):
+        """
+        """
+
+        if 'center' in keywords:
+            self.center = keywords['center']
+        else:
+            self.center = {}
+
+    def set_t(self):
+        """ Create an array t as seconds from self.t_ref
+
+            If t_ref is not defined, it uses the median of the
+              input['datetime'], than create an array data['t'] with the
+              seconds relative to t_ref.
+
+            It's not the most efficient way, but is done to work well with any
+              datetime dimension.
+        """
+        #t0 = min(self['datetime'])
+        #dt = ma.array([dt.total_seconds() for dt in self['datetime'] - t0])
+        #dt_median = ma.median(dt)
+        #self.t_ref = t0+timedelta(seconds = dt_median)
+        #self.data['t'] = dt-dt_median
+        #if ('t' not in self.keys()) & ('datetime' in self.keys()):
+        #self.data['t'] = self.input['t'] - np.median(self.input['t'])
+
+        #self.center['t']
+
+    def set_cilyndrical_components(self):
+        self.data['r'] = (self['x'] ** 2 + self['y'] ** 2) ** 0.5
+        self.data['vrad'], self.data['vtan'] = uv2nt(self['x'], self['y'],
+                self['u'], self['v'],
+                x_c=self.center['x'], y_c=self.center['y'])
+
+    def findcenter(self):
+        """
+optimize.tnc.RCSTRINGS
+EINVAL       = -2 # Invalid parameters (n<1)
+INFEASIBLE   = -1 # Infeasible (low > up)
+LOCALMINIMUM =  0 # Local minima reach (|pg| ~= 0)
+CONVERGED    =  1 # Converged (|f_n-f_(n-1)| ~= 0)
+MAXFUN       =  2 # Max. number of function evaluations reach
+LSFAIL       =  3 # Linear search failed
+CONSTANT     =  4 # All lower bounds are equal to the upper bounds
+NOPROGRESS   =  5 # Unable to progress
+USERABORT    =  6 # User requested end of minimization
+        """
+        verbose = 0
+        tref = np.median(self['t'])
+        self.center['t'] = tref
+        args = ((self['t'] - tref), self['x'], self['y'],
+                self['u'], self['v'])
+        f = fitt.v_circular()
+        #f.lamb = 1e-2
+        #f = fitt.v_circular_nontranslating()
+        #f.set_p0(self.data['x'], self.data['y'],
+        #        self.input['u'], self.input['v'])
+        bounds = None  #[(None,None), (None,None), (None,None), (None,None)]
+        op = optimize.fmin_tnc(f.cost, f.p0, fprime=None,  args=args,
+                approx_grad=1,  bounds=bounds, epsilon=1e-08, scale=None,
+                offset=None, messages=15, maxCGit=-1, maxfun=500, eta=-1,
+                stepmx=0, accuracy=0, fmin=0, ftol=-1, xtol=-1, pgtol=-1,
+                rescale=-1, disp=verbose)
+
+        self.opt_stat = op[2]
+
+        p = op[0]   # Output fitting parameters
+        self.center['x'] = f.s[0] * p[0]
+        self.center['y'] = f.s[1] * p[1]
+        self.center['u'] = f.s[2] * p[2]
+        self.center['v'] = f.s[3] * p[3]
+
+        self.data['xr'] = self.input['x'] - self['t'] * self.center['u']
+        self.data['yr'] = self.input['y'] - self['t'] * self.center['v']
+        self.data['ur'] = self.input['u'] - self.center['u']
+        self.data['vr'] = self.input['v'] - self.center['v']
+
+
+class RingCenterFlex(object):
+    """ A class to find the ring center, with flexible inputs.
+
+        Input:
+          data:
+            | Lat: Latitude
+            | Lon: Longitude
+            or
+            | x: x position
+            | y: y position
+
+            | datetime: Time [datetime]
+            or
+            | t: time [seconds]
+            u: u component of velocity [m/s]
+            v: v component of velocity [m/s]
+    """
+    def __init__(self, input, metadata={}, auto=True, **keywords):
+        """
+        """
+        if auto == True:
+            #self.set_xy()
+            #self.set_t()
+
+            self.findcenter()
+            #self.data['Lon_c'], self.data['Lat_c'] = xy2lonlat(self.data['xc'],
+            #        self.data['yc'], self.lon_ref, self.lat_ref)
+
+
+            #self.set_xy()   # Redefine the positions, discounting the uc|vc
+            self.set_cilyndrical_components()
 
     def _set_default_values(self, keywords):
         """
@@ -136,80 +243,6 @@ class RingCenter(object):
         #    self['x_r'] = self['x']-self.center['u']*self['dt']
         #    self['y_r'] = self['y']-self.center['v']*self['dt']
 
-    def set_t(self):
-        """ Create an array t as seconds from self.t_ref
-
-            If t_ref is not defined, it uses the median of the input['datetime'],
-              than create an array data['t'] with the seconds relative to t_ref.
-
-            It's not the most efficient way, but is done to work well with any
-              datetime dimension.
-        """
-        #t0 = min(self['datetime'])
-        #dt = ma.array([dt.total_seconds() for dt in self['datetime'] - t0])
-        #dt_median = ma.median(dt)
-        #self.t_ref = t0+timedelta(seconds = dt_median)
-        #self.data['t'] = dt-dt_median
-        #if ('t' not in self.keys()) & ('datetime' in self.keys()):
-        #self.data['t'] = self.input['t'] - np.median(self.input['t'])
-
-        #self.center['t']
-
-    def set_cilyndrical_components(self):
-        self.data['r'] = (self['x']**2 + self['y']**2)**0.5
-        self.data['vrad'], self.data['vtan'] = uv2nt(self['x'], self['y'],
-                self['u'], self['v'],
-                x_c=self.center['x'], y_c=self.center['y'])
-
-    def findcenter(self):
-        """
-optimize.tnc.RCSTRINGS
-EINVAL       = -2 # Invalid parameters (n<1)
-INFEASIBLE   = -1 # Infeasible (low > up)
-LOCALMINIMUM =  0 # Local minima reach (|pg| ~= 0)
-CONVERGED    =  1 # Converged (|f_n-f_(n-1)| ~= 0)
-MAXFUN       =  2 # Max. number of function evaluations reach
-LSFAIL       =  3 # Linear search failed
-CONSTANT     =  4 # All lower bounds are equal to the upper bounds
-NOPROGRESS   =  5 # Unable to progress
-USERABORT    =  6 # User requested end of minimization
-        """
-        verbose = 0
-        tref = np.median(self['t'])
-        self.center['t'] = tref
-        args = ((self['t']-tref), self['x'], self['y'],
-                self['u'], self['v'])
-        f = fitt.v_circular()
-        #f.lamb = 1e-2
-        #f = fitt.v_circular_nontranslating()
-        #f.set_p0(self.data['x'], self.data['y'],
-        #        self.input['u'], self.input['v'])
-        bounds = None #[(None,None), (None,None), (None,None), (None,None)]
-        op = optimize.fmin_tnc(f.cost, f.p0, fprime=None,  args=args, 
-                approx_grad=1,  bounds=bounds, epsilon=1e-08, scale=None, 
-                offset=None, messages=15, maxCGit=-1, maxfun=500, eta=-1, 
-                stepmx=0, accuracy=0, fmin=0, ftol=-1, xtol=-1, pgtol=-1, 
-                rescale=-1, disp=verbose)
-
-        self.opt_stat = op[2]
-
-        p = op[0]   # Output fitting parameters
-        #self.data['xc'] = f.s[0]*p[0]
-        #self.data['yc'] = f.s[1]*p[1]
-        #self.data['uc'] = f.s[2]*p[2]
-        #self.data['vc'] = f.s[3]*p[3]
-        self.center['x'] = f.s[0]*p[0]
-        self.center['y'] = f.s[1]*p[1]
-        self.center['u'] = f.s[2]*p[2]
-        self.center['v'] = f.s[3]*p[3]
-
-        self.data['xr'] = self.input['x'] - self['t']*self.center['u']
-        self.data['yr'] = self.input['y'] - self['t']*self.center['v']
-        self.data['ur'] = self.input['u'] - self.center['u']
-        self.data['vr'] = self.input['v'] - self.center['v']
-
-        #self.data['Lon_c'], self.data['Lat_c'] = xy2lonlat(self.data['xc'],
-        #        self.data['yc'], self.lon_ref, self.lat_ref)
 
 def plot_ring(self):
     import pylab

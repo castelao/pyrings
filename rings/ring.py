@@ -79,10 +79,10 @@ class RingCenter(object):
 
         if auto == True:
             #self.set_xy()
-            self.set_t()
+            #self.set_t()
 
             self.findcenter()
-            self.set_xy()   # Redefine the positions, discounting the uc|vc
+            #self.set_xy()   # Redefine the positions, discounting the uc|vc
             self.set_cilyndrical_components()
 
     def keys(self):
@@ -156,7 +156,7 @@ class RingCenter(object):
         #self.center['t']
 
     def set_cilyndrical_components(self):
-        self.data['r'] = (self.data['x']**2 + self.data['y']**2)**0.5
+        self.data['r'] = (self['x']**2 + self['y']**2)**0.5
         self.data['vrad'], self.data['vtan'] = uv2nt(self['x'], self['y'],
                 self['u'], self['v'],
                 x_c=self.center['x'], y_c=self.center['y'])
@@ -175,7 +175,9 @@ NOPROGRESS   =  5 # Unable to progress
 USERABORT    =  6 # User requested end of minimization
         """
         verbose = 0
-        args = (self['t'], self['x'], self['y'],
+        tref = np.median(self['t'])
+        self.center['t'] = tref
+        args = ((self['t']-tref), self['x'], self['y'],
                 self['u'], self['v'])
         f = fitt.v_circular()
         #f.lamb = 1e-2

@@ -3,6 +3,11 @@
 News
 ====
 
+0.8
+---
+
+* New class RingCenter, which expects the default mks inputs (t,x,y,u,v). The class RingCenterFlex, under construction, will accept more types of inputs, like LatxLon and datetime.
+
 0.6
 ---
 

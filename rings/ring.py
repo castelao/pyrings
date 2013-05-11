@@ -173,7 +173,7 @@ USERABORT    =  6 # User requested end of minimization
         self.data['vr'] = self.input['v'] - self.center['v']
 
 
-class RingCenterFlex(object):
+class RingCenterFlex(RingCenter):
     """ A class to find the ring center, with flexible inputs.
 
         Input:
@@ -193,6 +193,11 @@ class RingCenterFlex(object):
     def __init__(self, input, metadata={}, auto=True, **keywords):
         """
         """
+
+        # I don't think this keywords will work properly
+        super(RingCenterFlex, self).__init__(input, metadata, auto)
+        self.name = 'RingCenterFlex'
+
         if auto == True:
             #self.set_xy()
             #self.set_t()

@@ -13,12 +13,12 @@ NEWS = "." #open(os.path.join(here, 'NEWS.txt')).read()
 
 install_requires=[
     "numpy >= 1.1", 
-    "scipy >= 0.10.1",
+    "scipy >= 0.9.0rc2",
     "pandas >= 0.10.1",
     "fluid >= 0.1.10",
 ],
 
-version = '0.7.8'
+version = '0.8.0'
 
 setup(
     name = 'pyrings',

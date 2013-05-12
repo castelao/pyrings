@@ -18,31 +18,59 @@ from rings.misc.montecarlo import *
 
 # ============================================================================
 cfg_base = {'ring':
-            {'omega0': [1.5e-5, 2.6e-5], #2.0e-5
-                'delta': [120e3, 200e3], #170e3, 
+            {'omega0': [1.4e-5, 2.5e-5], #2.0e-5
+                'delta': [110e3, 200e3], #170e3, 
                 'alpha': [3.0, 5.0], #4.8
                 'u_c': [-0.20, 0.20],
-                'v_c': [-0.20, 0.20],
-                'lat_t0': 8,
-                'lon_t0': -50},
+                'v_c': [-0.20, 0.20]},
             'montecarlo':{
-                'sampling_type': 'regulargrid',
-                'dt': 0,
-                'Vnoise_sigma': 0, #[0.0, 0.20],
-                'Nsamples': [10, 500], 
+                'sampling_type': 'equal_area',
+                'SamplingPeriod': [3600, 3600*24*30],
+                #'dt': 3600,
+                'Vnoise_sigma': [0.0, 0.20],
+                'Nsamples': [10, 400], 
                 'Rlimit': [25e3, 300e3]
             }
         }
 
 
-data = montecarlo(cfg_base, 10000)
 import pandas as pd
+Niterations = 10
+version = '0.8.0'
+
+data = montecarlo(cfg_base, Niterations)
 data = pd.DataFrame(data)
-data.describe()
+#data.describe()
 
+store = pd.HDFStore('montecarlo_%s.h5' % version)
+store.append('trans_noise_equalarea', data)
+store.close()
 
-store = pd.HDFStore('montecarlo.h5')
-store.append('all_snapshot', data)
+#==========================
+cfg_base['montecarlo']['Vnoise_sigma'] = 0.0
+data = montecarlo(cfg_base, Niterations)
+data = pd.DataFrame(data)
 
-#data['Lc_err'] = (data['xc_err']**2 + data['yc_err']**2)**0.5
-#data['Vc_err'] = (data['uc_err']**2 + data['vc_err']**2)**0.5
+store = pd.HDFStore('montecarlo_%s.h5' % version)
+store.append('trans_nonoise_equalarea', data)
+store.close()
+
+#==========================
+cfg_base['ring']['u_c'] = 0.0
+cfg_base['ring']['v_c'] = 0.0
+data = montecarlo(cfg_base, Niterations)
+data = pd.DataFrame(data)
+
+store = pd.HDFStore('montecarlo_%s.h5' % version)
+store.append('notrans_nonoise_equalarea', data)
+store.close()
+
+#==========================
+cfg_base['montecarlo']['Vnoise_sigma'] = [0.0, 0.20]
+data = montecarlo(cfg_base, Niterations)
+data = pd.DataFrame(data)
+
+store = pd.HDFStore('montecarlo_%s.h5' % version)
+store.append('notrans_noise_equalarea', data)
+store.close()
+

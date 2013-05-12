@@ -13,7 +13,7 @@ import numpy as np
 from numpy import ma
 from numpy.random import random, randn
 
-from rings.ring import Ring
+from rings.ring import RingCenter
 from rings.fitt import carton_uv, carton_scales
 from rings.utils import xy2lonlat, lonlat2xy
 
@@ -21,11 +21,19 @@ from rings.utils import xy2lonlat, lonlat2xy
 def synthetic_CLring(x, y, t, cfg):
     """ Creates a synthetic ring like Carton n Legras
 
+        Input:
+          x: x [m]
+          y: y [m]
+          t: t [s]
+
         The parameters are passed by a dictionary: cfg
+
+        The center is at (0,0) at t=0
     """
     x_c = cfg['u_c'] * t  # + cfg['xt0']
     y_c = cfg['v_c'] * t  # + cfg['yt0']
     u, v = carton_uv(x-x_c, y-y_c, cfg['omega0'], cfg['delta'], cfg['alpha'])
+
     return u+cfg['u_c'], v+cfg['v_c']
 
 def drunken_walk(N, step=1, x0=0, y0=0):
@@ -107,8 +115,13 @@ def drifter_sample(cfg):
 
 def error_estimate(cfg):
     N = cfg['montecarlo']['Nsamples'] 
+    if ('dt' not in cfg['montecarlo']) & \
+    ('SamplingPeriod' in cfg['montecarlo']):
+        cfg['montecarlo']['dt'] = cfg['montecarlo']['SamplingPeriod']/(N-1.)
+    
     t = np.arange(N, dtype='i')*cfg['montecarlo']['dt']
-    t = t - np.median(t)
+
+    #t = t - np.median(t)
     # Define the (x,y) sampling positions
     if cfg['montecarlo']['sampling_type'] == 'equal_area':
         x, y = random_sample_equal_area(N , cfg['montecarlo']['Rlimit'])
@@ -116,6 +129,8 @@ def error_estimate(cfg):
         x, y = drunken_drive(N, step=1) #, x0=0, y0=0)
     elif cfg['montecarlo']['sampling_type'] == 'regulargrid':
         x, y = regulargrid_sample(N, cfg['montecarlo']['Rlimit'])
+    #elif cfg['montecarlo']['sampling_type'] == 'drifter':
+    #    x, y = regulargrid_sample(N, cfg['montecarlo']['Rlimit'])
 
     Rmedian = np.median((x**2+y**2)**0.5)
     # Estimate the measures
@@ -131,28 +146,33 @@ def error_estimate(cfg):
     u = u + u_noise
     v = v + v_noise
     # Might have a better way to do the line below.
-    d0 = datetime(2000,1,1)
-    d = d0+ma.array([timedelta(seconds=dt) for dt in t])
+    #d0 = datetime(2000,1,1)
+    #d = d0+ma.array([timedelta(seconds=dt) for dt in t])
     # Transform x,y into lon, lat
-    lon, lat = xy2lonlat(x, y, cfg['ring']['lon_t0'], cfg['ring']['lat_t0'])
+    #lon, lat = xy2lonlat(x, y, cfg['ring']['lon_t0'], cfg['ring']['lat_t0'])
     # Creating input to Class Ring
-    input = {'datetime': d, 'Lon': lon, 'Lat': lat, 'u':u, 'v':v}
-    anel = Ring(input)
+    #input = {'datetime': d, 'Lon': lon, 'Lat': lat, 'u':u, 'v':v}
+    #input = {'datetime': d, 'x': x, 'y': y, 'u':u, 'v':v}
+    input = {'t': t, 'x': x, 'y': y, 'u':u, 'v':v}
+    anel = RingCenter(input)
     # error estimate
-    xc_err, yc_err = lonlat2xy(ma.array([anel['Lon_c']]), ma.array([anel['Lat_c']]), [cfg['ring']['lon_t0']], [cfg['ring']['lat_t0']])
-    uc_err = anel['uc'] - cfg['ring']['u_c']
-    vc_err = anel['vc'] - cfg['ring']['v_c']
+    xc_err = anel.center['x'] - cfg['ring']['u_c'] * anel.center['t']
+    yc_err = anel.center['y'] - cfg['ring']['v_c'] * anel.center['t']
+    #xc_err, yc_err = lonlat2xy(ma.array([anel['Lon_c']]), ma.array([anel['Lat_c']]), [cfg['ring']['lon_t0']], [cfg['ring']['lat_t0']])
+    uc_err = anel.center['u'] - cfg['ring']['u_c']
+    vc_err = anel.center['v'] - cfg['ring']['v_c']
 
     Vmax, Rmax = \
                 carton_scales(cfg['ring']['omega0'], cfg['ring']['delta'],
                         cfg['ring']['alpha'])
     output = cfg.copy()
-    output['output'] = {'xc_err': xc_err[0], 'yc_err': yc_err[0],
+    output['output'] = {'xc_err': xc_err, 'yc_err': yc_err,
             'x_median': np.median(x), 'y_median': np.median(y),
             'uc_err': uc_err, 'vc_err': vc_err, 'Vmax': Vmax, 
             'Rmax': Rmax, 'noisesig_ratio': noisesig_ratio,
             'Rmedian': Rmedian, 'Vmedian': Vmedian,
-            'opt_stat': anel.opt_stat}
+            'opt_stat': anel.opt_stat,
+            'dt': cfg['montecarlo']['dt']}
 
     return output
 

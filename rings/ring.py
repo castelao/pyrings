@@ -79,6 +79,7 @@ class RingCenter(object):
         if auto == True:
             #self.set_t()
             self.findcenter()
+            self.set_ring_velocity()
             self.set_cilyndrical_components()
 
     def keys(self):
@@ -102,26 +103,6 @@ class RingCenter(object):
             self.center = keywords['center']
         else:
             self.center = {}
-
-    def set_t(self):
-        """ Create an array t as seconds from self.t_ref
-
-            If t_ref is not defined, it uses the median of the
-              input['datetime'], than create an array data['t'] with the
-              seconds relative to t_ref.
-
-            It's not the most efficient way, but is done to work well with any
-              datetime dimension.
-        """
-        #t0 = min(self['datetime'])
-        #dt = ma.array([dt.total_seconds() for dt in self['datetime'] - t0])
-        #dt_median = ma.median(dt)
-        #self.t_ref = t0+timedelta(seconds = dt_median)
-        #self.data['t'] = dt-dt_median
-        #if ('t' not in self.keys()) & ('datetime' in self.keys()):
-        #self.data['t'] = self.input['t'] - np.median(self.input['t'])
-
-        #self.center['t']
 
     def set_cilyndrical_components(self):
         self.data['r'] = (self['x'] ** 2 + self['y'] ** 2) ** 0.5
@@ -167,11 +148,11 @@ USERABORT    =  6 # User requested end of minimization
         self.center['u'] = f.s[2] * p[2]
         self.center['v'] = f.s[3] * p[3]
 
-    def set_ring_velocity():
+    def set_ring_velocity(self):
         """
         """
-        self.data['xr'] = self.input['x'] - self.input['t'] * self.center['u']
-        self.data['yr'] = self.input['y'] - self.input['t'] * self.center['v']
+        self.data['xr'] = self.input['x'] - self['t'] * self.center['u']
+        self.data['yr'] = self.input['y'] - self['t'] * self.center['v']
         self.data['ur'] = self.input['u'] - self.center['u']
         self.data['vr'] = self.input['v'] - self.center['v']
 
@@ -196,14 +177,14 @@ class RingCenterFlex(RingCenter):
     def __init__(self, input, metadata={}, auto=True, **keywords):
         """
         """
-
+        import pdb; pdb.set_trace()
         # I don't think this keywords will work properly
-        super(RingCenterFlex, self).__init__(input, metadata, auto)
+        super(RingCenterFlex, self).__init__(input, metadata, auto=False)
         self.name = 'RingCenterFlex'
 
         if auto == True:
             #self.set_xy()
-            #self.set_t()
+            self.set_t()
 
             self.findcenter()
             #self.data['Lon_c'], self.data['Lat_c'] = xy2lonlat(self.data['xc'],
@@ -211,6 +192,7 @@ class RingCenterFlex(RingCenter):
 
 
             #self.set_xy()   # Redefine the positions, discounting the uc|vc
+            self.set_ring_velocity()
             self.set_cilyndrical_components()
 
     def _set_default_values(self, keywords):
@@ -231,6 +213,29 @@ class RingCenterFlex(RingCenter):
         #    except KeyError:
         #        self.lat_ref = ma.median(self.input['Lat'])
         #        self.lon_ref = ma.median(self.input['Lon'])
+
+    def set_t(self):
+        """ Create an array t as seconds from self.t_ref
+
+            If t_ref is not defined, it uses the median of the
+              input['datetime'], than create an array data['t'] with the
+              seconds relative to t_ref.
+
+            It's not the most efficient way, but is done to work well with any
+              datetime dimension.
+
+            Should I convert datetime to t using the very first date?
+              I might avoid some errors doing on that way.
+        """
+        if ('t' not in self.keys()) & ('datetime' in self.input):
+            t0 = min(self['datetime'])
+            t = ma.array([dt.total_seconds() for dt in self['datetime'] - t0])
+            t_median = ma.median(t)
+            #self.t_ref = t0+timedelta(seconds = dt_median)
+            self.data['t'] = t - t_median
+        #self.data['t'] = self.input['t'] - np.median(self.input['t'])
+
+        self.ref['datetime'] = t0 + timedelta(seconds=t_median)
 
     def set_xy(self):
         """ Set x, y coordinates from Lat, Lon.

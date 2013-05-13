@@ -190,6 +190,9 @@ class RingCenterFlex(RingCenter):
             #self.data['Lon_c'], self.data['Lat_c'] = xy2lonlat(self.data['xc'],
             #        self.data['yc'], self.lon_ref, self.lat_ref)
 
+            if ('datetime' in self.input):
+                self.center['datetime'] = min(self['datetime']) + \
+                        timedelta(seconds = self.center['t'])
 
             #self.set_xy()   # Redefine the positions, discounting the uc|vc
             self.set_ring_velocity()
@@ -230,12 +233,13 @@ class RingCenterFlex(RingCenter):
         if ('t' not in self.keys()) & ('datetime' in self.input):
             t0 = min(self['datetime'])
             t = ma.array([dt.total_seconds() for dt in self['datetime'] - t0])
-            t_median = ma.median(t)
+            #t_median = ma.median(t)
             #self.t_ref = t0+timedelta(seconds = dt_median)
-            self.data['t'] = t - t_median
+            #self.data['t'] = t - t_median
+            self.data['t'] = t
         #self.data['t'] = self.input['t'] - np.median(self.input['t'])
 
-        self.ref['datetime'] = t0 + timedelta(seconds=t_median)
+        #self.ref['datetime'] = t0 + timedelta(seconds=t_median)
 
     def set_xy(self):
         """ Set x, y coordinates from Lat, Lon.

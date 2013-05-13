@@ -162,22 +162,22 @@ class RingCenterFlex(RingCenter):
 
         Input:
           data:
+            | datetime: Time [datetime]
+            or
+            | t: time [seconds]
+
             | Lat: Latitude
             | Lon: Longitude
             or
             | x: x position
             | y: y position
 
-            | datetime: Time [datetime]
-            or
-            | t: time [seconds]
             u: u component of velocity [m/s]
             v: v component of velocity [m/s]
     """
     def __init__(self, input, metadata={}, auto=True, **keywords):
         """
         """
-        import pdb; pdb.set_trace()
         # I don't think this keywords will work properly
         super(RingCenterFlex, self).__init__(input, metadata, auto=False)
         self.name = 'RingCenterFlex'
@@ -259,7 +259,6 @@ class RingCenterFlex(RingCenter):
 
 def plot_ring(self):
     import pylab
-    #import pdb; pdb.set_trace()
     pylab.quiver(self.data['x'], self.data['y'], self.input['u'],
             self.input['v'], color='r')
     pylab.quiver(self.data['xr'], self.data['yr'], self.data['ur'], self.data['vr'])

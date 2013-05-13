@@ -60,9 +60,9 @@ class RingCenter(object):
 
         Input:
           data:
+            t: time [seconds]
             x: x position
             y: y position
-            t: time [seconds]
             u: u component of velocity [m/s]
             v: v component of velocity [m/s [m/s]]
     """
@@ -167,8 +167,11 @@ USERABORT    =  6 # User requested end of minimization
         self.center['u'] = f.s[2] * p[2]
         self.center['v'] = f.s[3] * p[3]
 
-        self.data['xr'] = self.input['x'] - self['t'] * self.center['u']
-        self.data['yr'] = self.input['y'] - self['t'] * self.center['v']
+    def set_ring_velocity():
+        """
+        """
+        self.data['xr'] = self.input['x'] - self.input['t'] * self.center['u']
+        self.data['yr'] = self.input['y'] - self.input['t'] * self.center['v']
         self.data['ur'] = self.input['u'] - self.center['u']
         self.data['vr'] = self.input['v'] - self.center['v']
 

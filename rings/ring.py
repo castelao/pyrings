@@ -151,10 +151,10 @@ USERABORT    =  6 # User requested end of minimization
     def set_ring_velocity(self):
         """
         """
-        self.data['xr'] = self.input['x'] - self['t'] * self.center['u']
-        self.data['yr'] = self.input['y'] - self['t'] * self.center['v']
-        self.data['ur'] = self.input['u'] - self.center['u']
-        self.data['vr'] = self.input['v'] - self.center['v']
+        self.data['xr'] = self['x'] - self['t'] * self.center['u']
+        self.data['yr'] = self['y'] - self['t'] * self.center['v']
+        self.data['ur'] = self['u'] - self.center['u']
+        self.data['vr'] = self['v'] - self.center['v']
 
 
 class RingCenterFlex(RingCenter):
@@ -182,6 +182,8 @@ class RingCenterFlex(RingCenter):
         super(RingCenterFlex, self).__init__(input, metadata, auto=False)
         self.name = 'RingCenterFlex'
 
+        self._set_default_values_Flex(keywords)
+
         if auto == True:
             self.set_t()
             self.set_xy()
@@ -198,24 +200,26 @@ class RingCenterFlex(RingCenter):
             self.set_ring_velocity()
             self.set_cilyndrical_components()
 
-    def _set_default_values(self, keywords):
+    def _set_default_values_Flex(self, keywords):
         """
         """
 
-        if 'center' in keywords:
-            self.center = keywords['center']
-        else:
-            self.center = {}
+        self._set_default_values(keywords)
+
+        #if 'center' in keywords:
+        #    self.center = keywords['center']
+        #else:
+        #    self.center = {}
 
         # Lat, Lon of the origin of the coordinate system, i.e.  (x,y)
-        #if (not hasattr(self, 'lat_ref')) & (not hasattr(self, 'lon_ref')):
-        #    try:
-        #        self.lat_ref = self.center['lat']
-        #        self.lon_ref = self.center['lon']
-        #    #except AttributeError:
-        #    except KeyError:
-        #        self.lat_ref = ma.median(self.input['Lat'])
-        #        self.lon_ref = ma.median(self.input['Lon'])
+        if (not hasattr(self, 'lat_ref')) & (not hasattr(self, 'lon_ref')):
+            try:
+                self.lat_ref = self.center['lat']
+                self.lon_ref = self.center['lon']
+            #except AttributeError:
+            except KeyError:
+                self.lat_ref = ma.median(self.input['Lat'])
+                self.lon_ref = ma.median(self.input['Lon'])
 
     def set_t(self):
         """ Create an array t as seconds from self.t_ref

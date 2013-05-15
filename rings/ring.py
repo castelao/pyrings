@@ -183,8 +183,8 @@ class RingCenterFlex(RingCenter):
         self.name = 'RingCenterFlex'
 
         if auto == True:
-            #self.set_xy()
             self.set_t()
+            self.set_xy()
 
             self.findcenter()
             #self.data['Lon_c'], self.data['Lat_c'] = xy2lonlat(self.data['xc'],
@@ -247,12 +247,11 @@ class RingCenterFlex(RingCenter):
             Most of the procedures are based on cartesian distances. This
               function define x and y distance from lat_ref, lon_ref.
         """
-        if ('x' in self.input) & ('y' in self.input):
-            self.data['x'] = self.input['x']
-            self.data['y'] = self.input['y']
-            print "It will be used the x and y given as input"
-
-        else:
+        if ('x' not in self.input) & ('y' not in self.input) & \
+                ('Lat' in self.input) & ('Lon' in self.input):
+            #self.data['x'] = self.input['x']
+            #self.data['y'] = self.input['y']
+            #print "It will be used the x and y given as input"
             self.data['x'], self.data['y'] = lonlat2xy(self.input['Lon'], 
                     self.input['Lat'], lat_0=self.lat_ref, lon_0=self.lon_ref)
 

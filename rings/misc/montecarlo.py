@@ -97,40 +97,64 @@ def regulargrid_sample(N, Rlimit):
     return ma.array(x.flatten()[ind]), \
             ma.array(y.flatten()[ind])
 
-def drifter_sample(cfg):
-    N = cfg['montecarlo']['Nsamples']
-    dt = cfg['montecarlo']['dt']
+def drifter_sample(t, ring_cfg, Rlimit):
+    N = t.size
+    #dt = cfg['montecarlo']['dt']
     # Initial position
-    t = np.arange(N)*dt
-    x, y, u, v = ma.masked_all(N), ma.masked_all(N),ma.masked_all(N),ma.masked_all(N),
+    #t = np.arange(N)*dt
+    x, y = ma.masked_all(N), ma.masked_all(N),
+    u, v = ma.masked_all(N), ma.masked_all(N),
+
     x[0], y[0] = (2*random(2)-1)*cfg['montecarlo']['Rlimit']
-    u[0], v[0] = synthetic_CLring(x[0], y[0], t[0], cfg['ring'])
+    u[0], v[0] = synthetic_CLring(x[0], y[0], t[0], ring_cfg)
+
+    u_nonoise, v_nonoise = u.copy(), v.copy()
+
     for n in range(1,N): 
+        dt = t[n] - t[n-1]
         x[n], y[n] = x[n-1]+u[n-1]*dt, y[n-1]+v[n-1]*dt
-        u[n], v[n] = synthetic_CLring(x[n], y[n], t[n], cfg['ring'])
-        print x[n], y[n], u[n], v[n]
-    t = t - np.median(t)
+        u_nonoise[n], v_nonoise[n] = synthetic_CLring(x[n], y[n], t[n], cfg['ring'])
+        u[n] = u_nonoise[n] + cfg['montecarlo']['Vnoise_sigma'] * randn()
+        v[n] = v_nonoise[n] + cfg['montecarlo']['Vnoise_sigma'] * randn()
+        #print x[n], y[n], u[n], v[n]
+    #t = t - np.median(t)
     return {'t': t, 'x':x, 'y':y, 'u':u, 'v':v}
 
+def sampler(cfg):
+    """ Simulates sampling
 
-def error_estimate(cfg):
+        Input:
+            - t: Samples timing [s]
+            - method:
+                regulargrid
+                equal_area
+                drunken_drive
+                drifter
+            - Rlimit: Radial limit of the samples
+
+    """
+    # Number of samples
     N = cfg['montecarlo']['Nsamples'] 
+
+    # Defines the timing of the samples
     if ('dt' not in cfg['montecarlo']) & \
     ('SamplingPeriod' in cfg['montecarlo']):
         cfg['montecarlo']['dt'] = cfg['montecarlo']['SamplingPeriod']/(N-1.)
-    
     t = np.arange(N, dtype='i')*cfg['montecarlo']['dt']
 
-    #t = t - np.median(t)
     # Define the (x,y) sampling positions
-    if cfg['montecarlo']['sampling_type'] == 'equal_area':
-        x, y = random_sample_equal_area(N , cfg['montecarlo']['Rlimit'])
-    elif cfg['montecarlo']['sampling_type'] == 'drunken_drive':
-        x, y = drunken_drive(N, step=1) #, x0=0, y0=0)
-    elif cfg['montecarlo']['sampling_type'] == 'regulargrid':
+    if cfg['montecarlo']['sampling_type'] == 'regulargrid':
         x, y = regulargrid_sample(N, cfg['montecarlo']['Rlimit'])
-    #elif cfg['montecarlo']['sampling_type'] == 'drifter':
-    #    x, y = regulargrid_sample(N, cfg['montecarlo']['Rlimit'])
+    elif cfg['montecarlo']['sampling_type'] == 'equal_area':
+        x, y = random_sample_equal_area(N , cfg['montecarlo']['Rlimit'])
+    elif cfg['montecarlo']['sampling_type'] == 'drifter':
+        x, y = regulargrid_sample(t, Rlimit)
+    else:
+        return
+    #elif cfg['montecarlo']['sampling_type'] == 'drunken_drive':
+    #    x, y = drunken_drive(N, step=1) #, x0=0, y0=0)
+
+    #t = t - np.median(t)
 
     Rmedian = np.median((x**2+y**2)**0.5)
     # Estimate the measures
@@ -150,11 +174,28 @@ def error_estimate(cfg):
     #d = d0+ma.array([timedelta(seconds=dt) for dt in t])
     # Transform x,y into lon, lat
     #lon, lat = xy2lonlat(x, y, cfg['ring']['lon_t0'], cfg['ring']['lat_t0'])
+    Vmax, Rmax = \
+                carton_scales(cfg['ring']['omega0'], cfg['ring']['delta'],
+                        cfg['ring']['alpha'])
     # Creating input to Class Ring
     #input = {'datetime': d, 'Lon': lon, 'Lat': lat, 'u':u, 'v':v}
     #input = {'datetime': d, 'x': x, 'y': y, 'u':u, 'v':v}
-    input = {'t': t, 'x': x, 'y': y, 'u':u, 'v':v}
-    anel = RingCenter(input)
+    data = {'t': t, 'x': x, 'y': y, 'u':u, 'v':v}
+    stats = {'Rmedian': Rmedian, 'Vmedian': Vmedian,
+            'noisesig_ratio': noisesig_ratio,
+            'x_median': np.median(x), 'y_median': np.median(y),
+            'Vmax': Vmax, 'Rmax': Rmax,
+            }
+
+    return data, stats
+
+def error_estimate(cfg):
+
+    data, stats = sampler(cfg)
+            #method=cfg['montecarlo']['sampling_type'],
+            #Rlimit = cfg['montecarlo']['Rlimit'])
+
+    anel = RingCenter(data)
     # error estimate
     xc_err = anel.center['x'] - cfg['ring']['u_c'] * anel.center['t']
     yc_err = anel.center['y'] - cfg['ring']['v_c'] * anel.center['t']
@@ -162,17 +203,13 @@ def error_estimate(cfg):
     uc_err = anel.center['u'] - cfg['ring']['u_c']
     vc_err = anel.center['v'] - cfg['ring']['v_c']
 
-    Vmax, Rmax = \
-                carton_scales(cfg['ring']['omega0'], cfg['ring']['delta'],
-                        cfg['ring']['alpha'])
     output = cfg.copy()
     output['output'] = {'xc_err': xc_err, 'yc_err': yc_err,
-            'x_median': np.median(x), 'y_median': np.median(y),
-            'uc_err': uc_err, 'vc_err': vc_err, 'Vmax': Vmax, 
-            'Rmax': Rmax, 'noisesig_ratio': noisesig_ratio,
-            'Rmedian': Rmedian, 'Vmedian': Vmedian,
+            'uc_err': uc_err, 'vc_err': vc_err,
             'opt_stat': anel.opt_stat,
             'dt': cfg['montecarlo']['dt']}
+    for k in stats.keys():
+        output['output'][k] = stats[k]
 
     return output
 

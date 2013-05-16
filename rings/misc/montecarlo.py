@@ -49,7 +49,7 @@ def drunken_walk(N, step=1, x0=0, y0=0):
     y = dy.cumsum() + y0
     return x, y
 
-def drunken_drive(N, step=1, x0=0, y0=0):
+def drunken_drive(N, cfg, step=1e3, x0=0, y0=0):
     """ Simulates a standard normal change in course
 
     For N iterations it changes the course with a normal probability around
@@ -60,6 +60,7 @@ def drunken_drive(N, step=1, x0=0, y0=0):
 
       Variance between -90 to 90 deg.
     """
+    import pdb; pdb.set_trace()
     rad = 0.25*np.pi*randn(N)
     rad[0] = random(1)*2*np.pi
     rad = rad.cumsum()
@@ -97,16 +98,16 @@ def regulargrid_sample(N, Rlimit):
     return ma.array(x.flatten()[ind]), \
             ma.array(y.flatten()[ind])
 
-def drifter_sample(t, ring_cfg, Rlimit):
-    N = t.size
-    #dt = cfg['montecarlo']['dt']
+def drifter_sample(cfg):
+    N = cfg['montecarlo']['Nsamples']
+
     # Initial position
-    #t = np.arange(N)*dt
+    t = np.arange(N)*cfg['montecarlo']['dt']
     x, y = ma.masked_all(N), ma.masked_all(N),
     u, v = ma.masked_all(N), ma.masked_all(N),
 
     x[0], y[0] = (2*random(2)-1)*cfg['montecarlo']['Rlimit']
-    u[0], v[0] = synthetic_CLring(x[0], y[0], t[0], ring_cfg)
+    u[0], v[0] = synthetic_CLring(x[0], y[0], t[0], cfg['ring'])
 
     u_nonoise, v_nonoise = u.copy(), v.copy()
 
@@ -118,7 +119,9 @@ def drifter_sample(t, ring_cfg, Rlimit):
         v[n] = v_nonoise[n] + cfg['montecarlo']['Vnoise_sigma'] * randn()
         #print x[n], y[n], u[n], v[n]
     #t = t - np.median(t)
-    return {'t': t, 'x':x, 'y':y, 'u':u, 'v':v}
+    data= {'t': t, 'x':x, 'y':y, 'u':u, 'v':v}
+    stats = {}
+    return data, stats
 
 def sampler(cfg):
     """ Simulates sampling
@@ -140,7 +143,7 @@ def sampler(cfg):
     if ('dt' not in cfg['montecarlo']) & \
     ('SamplingPeriod' in cfg['montecarlo']):
         cfg['montecarlo']['dt'] = cfg['montecarlo']['SamplingPeriod']/(N-1.)
-    t = np.arange(N, dtype='i')*cfg['montecarlo']['dt']
+    t = (np.arange(N, dtype='i')-N/2.)*cfg['montecarlo']['dt']
 
     # Define the (x,y) sampling positions
     if cfg['montecarlo']['sampling_type'] == 'regulargrid':
@@ -148,11 +151,11 @@ def sampler(cfg):
     elif cfg['montecarlo']['sampling_type'] == 'equal_area':
         x, y = random_sample_equal_area(N , cfg['montecarlo']['Rlimit'])
     elif cfg['montecarlo']['sampling_type'] == 'drifter':
-        x, y = regulargrid_sample(t, Rlimit)
+        return drifter_sample(cfg)
+    elif cfg['montecarlo']['sampling_type'] == 'drunken_drive':
+        x, y = drunken_drive(N, cfg) #, x0=0, y0=0)
     else:
         return
-    #elif cfg['montecarlo']['sampling_type'] == 'drunken_drive':
-    #    x, y = drunken_drive(N, step=1) #, x0=0, y0=0)
 
     #t = t - np.median(t)
 

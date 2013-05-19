@@ -237,6 +237,11 @@ def random_cfg(cfg):
 def montecarlo(cfg_base, N):
     """
     """
+    try:
+        from progressbar import ProgressBar
+    except:
+        print "ProgressBar is not available"
+
     npes = 2 * multiprocessing.cpu_count()
     pool = multiprocessing.Pool(npes)
     results = []
@@ -249,7 +254,16 @@ def montecarlo(cfg_base, N):
     pool.close()
 
     data = []
+    try:
+        pbar = ProgressBar(maxval=len(results)).start()
+    except:
+        pass
+
     for i, r in enumerate(results):
+        try:
+            pbar.update(i)
+        except:
+            pass
         output = r.get()
         tmp = {}
         for k in output.keys():
@@ -257,6 +271,9 @@ def montecarlo(cfg_base, N):
                 tmp[kk] = output[k][kk]
         data.append(tmp)
     pool.terminate()
+    try:
+        pbar.finish()
+    except:
+        pass
 
-    #data = pd.DataFrame(data)
     return data

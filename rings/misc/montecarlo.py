@@ -49,7 +49,7 @@ def drunken_walk(N, step=1, x0=0, y0=0):
     y = dy.cumsum() + y0
     return x, y
 
-def drunken_drive(N, cfg, step=1e3, x0=0, y0=0):
+def drunken_drive(cfg):
     """ Simulates a standard normal change in course
 
     For N iterations it changes the course with a normal probability around
@@ -60,10 +60,14 @@ def drunken_drive(N, cfg, step=1e3, x0=0, y0=0):
 
       Variance between -90 to 90 deg.
     """
-    import pdb; pdb.set_trace()
+    N = cfg['montecarlo']['Nsamples']
+    Rlimit = cfg['montecarlo']['Rlimit']
+    x0 = Rlimit*(random(1)[0]-0.5)*2
+    y0 = Rlimit*(random(1)[0]-0.5)*2
     rad = 0.25*np.pi*randn(N)
     rad[0] = random(1)*2*np.pi
     rad = rad.cumsum()
+    step = cfg['montecarlo']['dt'] * cfg['montecarlo']['VSampler']
     dx = ma.sin(rad)*step
     dy = ma.cos(rad)*step
     x = dx.cumsum() + x0
@@ -153,7 +157,7 @@ def sampler(cfg):
     elif cfg['montecarlo']['sampling_type'] == 'drifter':
         return drifter_sample(cfg)
     elif cfg['montecarlo']['sampling_type'] == 'drunken_drive':
-        x, y = drunken_drive(N, cfg) #, x0=0, y0=0)
+        x, y = drunken_drive(cfg) #, x0=0, y0=0)
     else:
         return
 

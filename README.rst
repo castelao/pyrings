@@ -9,6 +9,21 @@ The center is estimated and the data is re-estructured to a natural coordinate s
 
 This concept was developed during my PhD, and I'm planning to release it in three major blocks. This first one is just to identify the center and transform the usual cartesian data distribution into a cylindrical system for better suit the Cyclo-Geostrophic approximation.
 
+Reference
+---------
+
+If you use it, please cite us: 
+
+| @article{castelao2013,
+|  title = "An objective reference system for studying rings in the ocean",
+|  author = "Guilherme P. Castel{\~a}o and Luiz C. Irber Jr and Ana Villas Boas",
+|  journal = "Computers \& Geosciences",
+|  volume = "61",
+|  pages = "43--49",
+|  year = "2013",
+|  publisher = "Pergamon"
+|  }
+
 Acknowledgment
 --------------
 

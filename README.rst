@@ -12,7 +12,7 @@ This concept was developed during my PhD, and I'm planning to release it in thre
 Reference
 ---------
 
-If you use it, please cite us: 
+If you use it, please cite us: http://dx.doi.org/10.1016/j.cageo.2013.07.004
 
 | @article{castelao2013,
 |  title = "An objective reference system for studying rings in the ocean",
